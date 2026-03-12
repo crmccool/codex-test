@@ -8,8 +8,8 @@
   </head>
   <body>
     <main class="container">
-      <header>
-        <h1>Faculty Profile Filter</h1>
+      <header class="hero">
+        <h1>Faculty Profile Explorer</h1>
         <p>
           Select one or more departments and countries. Filters use
           <strong>OR</strong> logic within each group and <strong>AND</strong>
@@ -17,7 +17,7 @@
         </p>
       </header>
 
-      <section class="controls" aria-label="Filters">
+      <section class="controls panel" aria-label="Filters">
         <div class="control-group">
           <span>Departments / disciplines</span>
           <div
@@ -38,7 +38,7 @@
         </div>
       </section>
 
-      <section class="map-panel" aria-label="Country map filter">
+      <section class="map-panel panel" aria-label="Country map filter">
         <h2>Country map</h2>
         <p class="map-help">
           Click a country dot to toggle it in the country filter.
@@ -62,7 +62,7 @@
         </svg>
       </section>
 
-      <p id="status" class="status">Loading faculty data…</p>
+      <p id="status" class="status panel">Loading faculty data…</p>
 
       <section id="results" class="results" aria-live="polite"></section>
 
