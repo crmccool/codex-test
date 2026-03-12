@@ -184,8 +184,7 @@ button:hover {
   fill: #6b7280;
   stroke: rgba(255, 255, 255, 0.95);
   stroke-width: 1.5;
-  transition: transform 120ms ease, fill 120ms ease, stroke-width 120ms ease;
-  transform-origin: center;
+  transition: fill 120ms ease, stroke 120ms ease, stroke-width 120ms ease;
 }
 
 .map-country.available {
@@ -195,14 +194,14 @@ button:hover {
 
 .map-country.available:hover {
   fill: var(--primary-dark);
-  transform: scale(1.18);
+  stroke: #dbeafe;
+  stroke-width: 2;
 }
 
 .map-country.selected {
   fill: var(--dot-selected);
   stroke: #7c2d12;
-  stroke-width: 2.2;
-  transform: scale(1.24);
+  stroke-width: 2.6;
 }
 
 .map-country.unavailable {

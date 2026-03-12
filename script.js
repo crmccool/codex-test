@@ -293,10 +293,6 @@ function updateCountryFilterOptions(departmentMatches) {
 }
 
 function renderWorldMap(countries, selectedCountries, availableCountries) {
-  if (!mapCountriesLayer) {
-    return;
-  }
-
   mapCountriesLayer.innerHTML = "";
 
   countries.forEach((country) => {
@@ -304,10 +300,8 @@ function renderWorldMap(countries, selectedCountries, availableCountries) {
     const isAvailable = availableCountries.has(country);
     const isSelected = selectedCountries.has(country);
 
-    const marker = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    marker.setAttribute("cx", String(x));
-    marker.setAttribute("cy", String(y));
-    marker.setAttribute("r", "6");
+    const marker = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    marker.setAttribute("d", buildCountryShapePath(country, x, y));
     marker.setAttribute(
       "class",
       `map-country ${isAvailable ? "available" : "unavailable"} ${isSelected ? "selected" : ""}`.trim()
@@ -319,13 +313,52 @@ function renderWorldMap(countries, selectedCountries, availableCountries) {
     marker.appendChild(title);
 
     if (isAvailable) {
+      marker.setAttribute("tabindex", "0");
+      marker.setAttribute("role", "button");
       marker.addEventListener("click", () => {
         toggleCountrySelection(country);
+      });
+      marker.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleCountrySelection(country);
+        }
       });
     }
 
     mapCountriesLayer.appendChild(marker);
   });
+}
+
+function buildCountryShapePath(country, x, y) {
+  const hash = hashCountry(country);
+  const width = 7 + (hash % 5);
+  const height = 4 + ((hash >> 3) % 4);
+  const skewX = ((hash >> 5) % 5) - 2;
+  const skewY = ((hash >> 8) % 5) - 2;
+
+  const points = [
+    [x - width, y - height],
+    [x - width / 4 + skewX, y - height - 1],
+    [x + width, y - height / 3],
+    [x + width - 1, y + height],
+    [x - width / 3 + skewY, y + height + 1],
+    [x - width - 1, y + height / 3],
+  ];
+
+  return (
+    points
+      .map((point, index) => `${index === 0 ? "M" : "L"}${point[0].toFixed(1)},${point[1].toFixed(1)}`)
+      .join(" ") + " Z"
+  );
+}
+
+function hashCountry(country) {
+  let hash = 0;
+  for (let i = 0; i < country.length; i += 1) {
+    hash = (hash * 31 + country.charCodeAt(i)) >>> 0;
+  }
+  return hash;
 }
 
 function projectCountry(country) {
@@ -337,10 +370,7 @@ function projectCountry(country) {
 }
 
 function fallbackCoordinates(country) {
-  let hash = 0;
-  for (let i = 0; i < country.length; i += 1) {
-    hash = (hash * 31 + country.charCodeAt(i)) >>> 0;
-  }
+  const hash = hashCountry(country);
   const longitude = (hash % 320) - 160;
   const latitude = ((Math.floor(hash / 320) % 120) - 60) * 0.9;
   return [longitude, latitude];
