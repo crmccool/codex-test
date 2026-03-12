@@ -201,6 +201,7 @@ function splitTokens(value) {
   if (!value) {
     return [];
   }
+
   return value
     .split(",")
     .map((part) => part.trim())
@@ -241,6 +242,7 @@ function addDepartmentButtons(values) {
     button.textContent = value;
     button.dataset.value = value;
     button.setAttribute("aria-pressed", "false");
+
     button.addEventListener("click", () => {
       if (selectedDepartments.has(value)) {
         selectedDepartments.delete(value);
@@ -253,10 +255,10 @@ function addDepartmentButtons(values) {
       }
       render();
     });
+
     departmentFilter.appendChild(button);
   });
 }
-
 
 function setOptions(select, values, selectedValues = new Set()) {
   select.innerHTML = "";
@@ -291,6 +293,10 @@ function updateCountryFilterOptions(departmentMatches) {
 }
 
 function renderWorldMap(countries, selectedCountries, availableCountries) {
+  if (!mapCountriesLayer) {
+    return;
+  }
+
   mapCountriesLayer.innerHTML = "";
 
   countries.forEach((country) => {
@@ -304,9 +310,7 @@ function renderWorldMap(countries, selectedCountries, availableCountries) {
     marker.setAttribute("r", "6");
     marker.setAttribute(
       "class",
-      `map-country ${
-        isAvailable ? "available" : "unavailable"
-      } ${isSelected ? "selected" : ""}`.trim()
+      `map-country ${isAvailable ? "available" : "unavailable"} ${isSelected ? "selected" : ""}`.trim()
     );
     marker.setAttribute("aria-label", country);
 
@@ -412,7 +416,7 @@ function renderCard(person) {
 }
 
 function escapeHtml(value) {
-  return value
+  return String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
