@@ -210,6 +210,7 @@ function splitTokens(value) {
   if (!value) {
     return [];
   }
+
   return value
     .split(",")
     .map((part) => part.trim())
@@ -249,6 +250,7 @@ function addDepartmentButtons(values) {
     button.textContent = value;
     button.dataset.value = value;
     button.setAttribute("aria-pressed", "false");
+
     button.addEventListener("click", () => {
       if (selectedDepartments.has(value)) {
         selectedDepartments.delete(value);
@@ -261,6 +263,7 @@ function addDepartmentButtons(values) {
       }
       render();
     });
+
     departmentFilter.appendChild(button);
   });
 }
@@ -359,6 +362,7 @@ function makeMapCountryInteractive(element, country) {
       toggleCountrySelection(country);
     }
   });
+
   element.addEventListener("keydown", (event) => {
     if (!element.classList.contains("available")) {
       return;
@@ -579,7 +583,7 @@ function renderCard(person) {
 }
 
 function escapeHtml(value) {
-  return value
+  return String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
