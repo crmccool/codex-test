@@ -11,7 +11,7 @@
       <header>
         <h1>Faculty Profile Filter</h1>
         <p>
-          Select one or more departments and countries/regions. Filters use
+          Select one or more departments and countries. Filters use
           <strong>OR</strong> logic within each group and <strong>AND</strong>
           logic across groups.
         </p>
@@ -19,18 +19,47 @@
 
       <section class="controls" aria-label="Filters">
         <div class="control-group">
-          <label for="departmentFilter">Departments / disciplines</label>
-          <select id="departmentFilter" multiple size="8"></select>
+          <span>Departments / disciplines</span>
+          <div
+            id="departmentFilter"
+            class="chip-list"
+            role="group"
+            aria-label="Departments / disciplines"
+          ></div>
         </div>
 
         <div class="control-group">
-          <label for="geoFilter">Countries and regions</label>
+          <label for="geoFilter">Countries</label>
           <select id="geoFilter" multiple size="8"></select>
         </div>
 
         <div class="control-actions">
           <button id="clearBtn" type="button">Clear filters</button>
         </div>
+      </section>
+
+      <section class="map-panel" aria-label="Country map filter">
+        <h2>Country map</h2>
+        <p class="map-help">
+          Click a country dot to toggle it in the country filter.
+        </p>
+        <svg
+          id="worldMap"
+          class="world-map"
+          viewBox="0 0 1000 500"
+          role="img"
+          aria-label="Clickable world map for country filter"
+        >
+          <g class="map-land" aria-hidden="true">
+            <path d="M90,110 L235,100 L285,160 L255,230 L180,250 L100,210 Z" />
+            <path d="M230,260 L320,255 L355,420 L290,470 L230,430 Z" />
+            <path d="M410,90 L560,80 L640,130 L620,210 L470,220 L400,160 Z" />
+            <path d="M540,230 L650,220 L710,330 L655,450 L565,420 L520,320 Z" />
+            <path d="M660,80 L940,95 L955,180 L870,215 L760,210 L680,155 Z" />
+            <path d="M805,330 L900,330 L930,395 L860,450 L790,420 Z" />
+          </g>
+          <g id="mapCountries"></g>
+        </svg>
       </section>
 
       <p id="status" class="status">Loading faculty data…</p>
@@ -43,16 +72,15 @@
           <li>
             Data columns are read directly from the CSV headers:
             <code>name</code>, <code>primary_department</code>,
-            <code>countries_normalized</code>, <code>regions_derived</code>,
-            and <code>focus_areas</code>.
+            <code>countries_normalized</code>, and
+            <code>focus_areas</code>.
           </li>
           <li>
-            <code>countries_normalized</code> and <code>regions_derived</code>
-            values are split on commas into separate tokens.
+            <code>countries_normalized</code> values are split on commas into
+            separate tokens.
           </li>
           <li>
-            The geography filter matches against both country tokens and region
-            tokens in one list.
+            The geography filter matches country tokens only.
           </li>
         </ul>
       </details>

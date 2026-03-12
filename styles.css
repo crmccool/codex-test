@@ -46,7 +46,17 @@ header p {
   gap: 0.5rem;
 }
 
-label {
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  max-height: 13rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+label,
+.control-group > span {
   font-weight: 600;
 }
 
@@ -76,9 +86,86 @@ button:hover {
   background: #1d4ed8;
 }
 
+.chip {
+  border: 1px solid #9ca3af;
+  background: #fff;
+  color: #1f2937;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+}
+
+.chip:hover {
+  background: #f3f4f6;
+}
+
+.chip.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
 .status {
   margin: 1rem 0 0.5rem;
   font-weight: 600;
+}
+
+.map-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.map-panel h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.map-help {
+  margin: 0.4rem 0 0.8rem;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.world-map {
+  width: 100%;
+  height: auto;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #eef2ff;
+}
+
+.map-land path {
+  fill: #e5e7eb;
+  stroke: #cbd5e1;
+  stroke-width: 2;
+}
+
+.map-country {
+  fill: #6b7280;
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.map-country.available {
+  fill: #2563eb;
+  cursor: pointer;
+}
+
+.map-country.available:hover {
+  fill: #1d4ed8;
+}
+
+.map-country.selected {
+  fill: #f97316;
+  stroke: #7c2d12;
+  stroke-width: 2;
+}
+
+.map-country.unavailable {
+  fill: #9ca3af;
+  opacity: 0.45;
 }
 
 .results {
