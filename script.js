@@ -1,15 +1,18 @@
 const CSV_FILE = "CODEX TEST - Faculty List.csv";
+const WORLD_MAP_FILE = "world-atlas-countries-110m.json";
 
 const departmentFilter = document.getElementById("departmentFilter");
 const geoFilter = document.getElementById("geoFilter");
 const clearBtn = document.getElementById("clearBtn");
 const resultsContainer = document.getElementById("results");
 const statusEl = document.getElementById("status");
+const mapBaseLayer = document.getElementById("mapBase");
 const mapCountriesLayer = document.getElementById("mapCountries");
 
 let allFaculty = [];
 const selectedDepartments = new Set();
 let allCountries = [];
+const mapCountryElements = new Map();
 
 const COUNTRY_COORDINATES = {
   Argentina: [-64, -34],
@@ -92,6 +95,11 @@ const COUNTRY_COORDINATES = {
   Zimbabwe: [29.15, -19.02],
 };
 
+const COUNTRY_NAME_ALIASES = {
+  "Democratic Republic of the Congo": "Congo",
+  "The Netherlands": "Netherlands",
+};
+
 init();
 
 async function init() {
@@ -110,6 +118,7 @@ async function init() {
       .sort(sortFaculty);
 
     populateFilters(allFaculty);
+    await initializeWorldMap();
     bindEvents();
     render();
   } catch (error) {
@@ -216,7 +225,6 @@ function populateFilters(facultyList) {
 
   addDepartmentButtons(departments);
   addOptions(geoFilter, allCountries);
-  renderWorldMap(allCountries, new Set(), new Set(allCountries));
 }
 
 function uniqueSorted(items) {
@@ -292,65 +300,182 @@ function updateCountryFilterOptions(departmentMatches) {
   setOptions(geoFilter, availableCountries, stillValidSelections);
 }
 
-function renderWorldMap(countries, selectedCountries, availableCountries) {
-  mapCountriesLayer.innerHTML = "";
-
-  countries.forEach((country) => {
-    const [x, y] = projectCountry(country);
-    const isAvailable = availableCountries.has(country);
-    const isSelected = selectedCountries.has(country);
-
-    const marker = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    marker.setAttribute("d", buildCountryShapePath(country, x, y));
-    marker.setAttribute(
-      "class",
-      `map-country ${isAvailable ? "available" : "unavailable"} ${isSelected ? "selected" : ""}`.trim()
-    );
-    marker.setAttribute("aria-label", country);
-
-    const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-    title.textContent = country;
-    marker.appendChild(title);
-
-    if (isAvailable) {
-      marker.setAttribute("tabindex", "0");
-      marker.setAttribute("role", "button");
-      marker.addEventListener("click", () => {
-        toggleCountrySelection(country);
-      });
-      marker.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          toggleCountrySelection(country);
-        }
-      });
+async function initializeWorldMap() {
+  try {
+    const response = await fetch(WORLD_MAP_FILE);
+    if (!response.ok) {
+      throw new Error(`Failed to load world map: ${response.status}`);
     }
 
-    mapCountriesLayer.appendChild(marker);
+    const topology = await response.json();
+    const countryFeatures = topologyToFeatures(topology);
+    const pathByName = new Map();
+
+    countryFeatures.forEach((feature) => {
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", feature.path);
+      path.setAttribute("class", "map-base-country");
+      mapBaseLayer.appendChild(path);
+      pathByName.set(feature.name, path);
+    });
+
+    allCountries.forEach((country) => {
+      const canonicalName = COUNTRY_NAME_ALIASES[country] || country;
+      const existingPath = pathByName.get(canonicalName);
+
+      if (existingPath) {
+        existingPath.classList.add("map-country");
+        existingPath.dataset.country = country;
+        existingPath.appendChild(makeTitle(country));
+        makeMapCountryInteractive(existingPath, country);
+        mapCountryElements.set(country, existingPath);
+        return;
+      }
+
+      const fallback = buildFallbackCountryPath(country);
+      fallback.classList.add("map-country", "fallback-country");
+      fallback.dataset.country = country;
+      fallback.appendChild(makeTitle(country));
+      makeMapCountryInteractive(fallback, country);
+      mapCountriesLayer.appendChild(fallback);
+      mapCountryElements.set(country, fallback);
+    });
+  } catch (error) {
+    mapBaseLayer.innerHTML = "";
+    mapCountriesLayer.innerHTML = "";
+    allCountries.forEach((country) => {
+      const fallback = buildFallbackCountryPath(country);
+      fallback.classList.add("map-country", "fallback-country");
+      fallback.dataset.country = country;
+      fallback.appendChild(makeTitle(country));
+      makeMapCountryInteractive(fallback, country);
+      mapCountriesLayer.appendChild(fallback);
+      mapCountryElements.set(country, fallback);
+    });
+    console.error(error);
+  }
+}
+
+function makeMapCountryInteractive(element, country) {
+  element.addEventListener("click", () => {
+    if (element.classList.contains("available")) {
+      toggleCountrySelection(country);
+    }
+  });
+
+  element.addEventListener("keydown", (event) => {
+    if (!element.classList.contains("available")) {
+      return;
+    }
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      toggleCountrySelection(country);
+    }
   });
 }
 
-function buildCountryShapePath(country, x, y) {
-  const hash = hashCountry(country);
-  const width = 7 + (hash % 5);
-  const height = 4 + ((hash >> 3) % 4);
-  const skewX = ((hash >> 5) % 5) - 2;
-  const skewY = ((hash >> 8) % 5) - 2;
+function makeTitle(country) {
+  const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+  title.textContent = country;
+  return title;
+}
 
-  const points = [
-    [x - width, y - height],
-    [x - width / 4 + skewX, y - height - 1],
-    [x + width, y - height / 3],
-    [x + width - 1, y + height],
-    [x - width / 3 + skewY, y + height + 1],
-    [x - width - 1, y + height / 3],
-  ];
-
-  return (
-    points
-      .map((point, index) => `${index === 0 ? "M" : "L"}${point[0].toFixed(1)},${point[1].toFixed(1)}`)
-      .join(" ") + " Z"
+function buildFallbackCountryPath(country) {
+  const [x, y] = projectCountry(country);
+  const size = 5;
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute(
+    "d",
+    `M${x},${y - size} L${x + size},${y} L${x},${y + size} L${x - size},${y} Z`
   );
+  return path;
+}
+
+function topologyToFeatures(topology) {
+  const transform = topology.transform;
+  const decodedArcs = decodeArcs(topology.arcs, transform.scale, transform.translate);
+  const geometries = topology.objects.countries.geometries;
+
+  return geometries.map((geometry) => {
+    const polygons = geometryToPolygons(geometry, decodedArcs);
+    return {
+      name: geometry.properties?.name || geometry.id,
+      path: polygonsToPath(polygons),
+    };
+  });
+}
+
+function decodeArcs(arcs, scale, translate) {
+  return arcs.map((arc) => {
+    let x = 0;
+    let y = 0;
+    return arc.map(([dx, dy]) => {
+      x += dx;
+      y += dy;
+      return [x * scale[0] + translate[0], y * scale[1] + translate[1]];
+    });
+  });
+}
+
+function geometryToPolygons(geometry, decodedArcs) {
+  if (geometry.type === "Polygon") {
+    return [polygonArcsToRings(geometry.arcs, decodedArcs)];
+  }
+  if (geometry.type === "MultiPolygon") {
+    return geometry.arcs.map((polygonArcs) =>
+      polygonArcsToRings(polygonArcs, decodedArcs)
+    );
+  }
+  return [];
+}
+
+function polygonArcsToRings(polygonArcs, decodedArcs) {
+  return polygonArcs.map((ringArcs) => combineArcs(ringArcs, decodedArcs));
+}
+
+function combineArcs(arcIndexes, decodedArcs) {
+  const ring = [];
+  arcIndexes.forEach((index, arcIndex) => {
+    const arc = index >= 0 ? decodedArcs[index] : [...decodedArcs[~index]].reverse();
+    const points = arcIndex === 0 ? arc : arc.slice(1);
+    ring.push(...points);
+  });
+  return ring;
+}
+
+function polygonsToPath(polygons) {
+  return polygons
+    .map((rings) =>
+      rings
+        .map((ring) =>
+          ring
+            .map((point, index) => {
+              const [x, y] = projectLonLat(point);
+              return `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
+            })
+            .join(" ") + " Z"
+        )
+        .join(" ")
+    )
+    .join(" ");
+}
+
+function projectLonLat([longitude, latitude]) {
+  const x = ((longitude + 180) / 360) * 1000;
+  const y = ((90 - latitude) / 180) * 500;
+  return [Math.max(0, Math.min(1000, x)), Math.max(0, Math.min(500, y))];
+}
+
+function projectCountry(country) {
+  const coordinates = COUNTRY_COORDINATES[country] || fallbackCoordinates(country);
+  return projectLonLat(coordinates);
+}
+
+function fallbackCoordinates(country) {
+  const hash = hashCountry(country);
+  const longitude = (hash % 320) - 160;
+  const latitude = ((Math.floor(hash / 320) % 120) - 60) * 0.9;
+  return [longitude, latitude];
 }
 
 function hashCountry(country) {
@@ -361,19 +486,31 @@ function hashCountry(country) {
   return hash;
 }
 
-function projectCountry(country) {
-  const coordinates = COUNTRY_COORDINATES[country] || fallbackCoordinates(country);
-  const [longitude, latitude] = coordinates;
-  const x = ((longitude + 180) / 360) * 1000;
-  const y = ((90 - latitude) / 180) * 500;
-  return [Math.max(8, Math.min(992, x)), Math.max(8, Math.min(492, y))];
-}
+function updateMapSelection(selectedCountries, availableCountries) {
+  allCountries.forEach((country) => {
+    const element = mapCountryElements.get(country);
+    if (!element) {
+      return;
+    }
 
-function fallbackCoordinates(country) {
-  const hash = hashCountry(country);
-  const longitude = (hash % 320) - 160;
-  const latitude = ((Math.floor(hash / 320) % 120) - 60) * 0.9;
-  return [longitude, latitude];
+    const isAvailable = availableCountries.has(country);
+    const isSelected = selectedCountries.has(country);
+
+    element.classList.remove("available", "unavailable", "selected");
+    element.classList.add(isAvailable ? "available" : "unavailable");
+
+    if (isSelected) {
+      element.classList.add("selected");
+    }
+
+    if (isAvailable) {
+      element.setAttribute("tabindex", "0");
+      element.setAttribute("role", "button");
+    } else {
+      element.removeAttribute("tabindex");
+      element.removeAttribute("role");
+    }
+  });
 }
 
 function toggleCountrySelection(country) {
@@ -408,7 +545,7 @@ function render() {
   updateCountryFilterOptions(departmentMatches);
   const selectedGeos = getSelectedValues(geoFilter);
   const availableCountries = new Set(Array.from(geoFilter.options, (opt) => opt.value));
-  renderWorldMap(allCountries, selectedGeos, availableCountries);
+  updateMapSelection(selectedGeos, availableCountries);
 
   const filtered = departmentMatches.filter((person) => {
     const geoPasses =
