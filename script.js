@@ -138,6 +138,7 @@ function addDepartmentButtons(departments) {
     button.className = "chip";
     button.dataset.department = department;
     button.textContent = department;
+    button.setAttribute("aria-pressed", "false");
     button.addEventListener("click", () => {
       if (selectedDepartments.has(department)) {
         selectedDepartments.delete(department);
