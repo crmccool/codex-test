@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Faculty Filter Prototype</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Faculty Profile Filter</h1>
+        <p>
+          Click department buttons and select one or more countries. Filters use
+          <strong>OR</strong> logic within each group and <strong>AND</strong>
+          logic across groups.
+        </p>
+      </header>
+
+      <section class="controls" aria-label="Filters">
+        <div class="control-group">
+          <p class="filter-label">Departments / disciplines</p>
+          <div id="departmentButtons" class="chip-wrap" aria-label="Department filters"></div>
+        </div>
+
+        <div class="control-group">
+          <label for="countryFilter">Countries</label>
+          <select id="countryFilter" multiple size="12"></select>
+        </div>
+
+        <div class="control-actions">
+          <button id="clearBtn" type="button">Clear filters</button>
+        </div>
+      </section>
+
+      <p id="status" class="status">Loading faculty data…</p>
+
+      <section id="results" class="results" aria-live="polite"></section>
+
+      <details class="assumptions">
+        <summary>CSV cleaning assumptions used</summary>
+        <ul>
+          <li>
+            Data columns are read directly from the CSV headers:
+            <code>name</code>, <code>primary_department</code>,
+            <code>countries_normalized</code>, and <code>focus_areas</code>.
+          </li>
+          <li>
+            <code>countries_normalized</code> values are split on commas into
+            separate country tokens.
+          </li>
+          <li>
+            This iteration intentionally filters by countries only (no
+            region-based matching).
+          </li>
+        </ul>
+      </details>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
