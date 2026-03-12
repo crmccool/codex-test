@@ -8,6 +8,7 @@ const statusEl = document.getElementById("status");
 
 let allFaculty = [];
 const selectedDepartments = new Set();
+let allCountries = [];
 
 init();
 
@@ -118,6 +119,7 @@ function splitTokens(value) {
   if (!value) {
     return [];
   }
+
   return value
     .split(",")
     .map((part) => part.trim())
@@ -128,10 +130,10 @@ function populateFilters(facultyList) {
   const departments = uniqueSorted(
     facultyList.map((f) => f.department).filter(Boolean)
   );
-  const geos = uniqueSorted(facultyList.flatMap((f) => f.countries));
+  allCountries = uniqueSorted(facultyList.flatMap((f) => f.countries));
 
   addDepartmentButtons(departments);
-  addOptions(geoFilter, geos);
+  addOptions(geoFilter, allCountries);
 }
 
 function uniqueSorted(items) {
@@ -157,6 +159,7 @@ function addDepartmentButtons(values) {
     button.textContent = value;
     button.dataset.value = value;
     button.setAttribute("aria-pressed", "false");
+
     button.addEventListener("click", () => {
       if (selectedDepartments.has(value)) {
         selectedDepartments.delete(value);
@@ -169,8 +172,41 @@ function addDepartmentButtons(values) {
       }
       render();
     });
+
     departmentFilter.appendChild(button);
   });
+}
+
+function setOptions(select, values, selectedValues = new Set()) {
+  select.innerHTML = "";
+  values.forEach((value) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    option.selected = selectedValues.has(value);
+    select.appendChild(option);
+  });
+}
+
+function getDepartmentMatches() {
+  return allFaculty.filter(
+    (person) =>
+      selectedDepartments.size === 0 || selectedDepartments.has(person.department)
+  );
+}
+
+function updateCountryFilterOptions(departmentMatches) {
+  const availableCountries =
+    selectedDepartments.size === 0
+      ? allCountries
+      : uniqueSorted(departmentMatches.flatMap((person) => person.countries));
+
+  const selectedGeos = getSelectedValues(geoFilter);
+  const stillValidSelections = new Set(
+    [...selectedGeos].filter((country) => availableCountries.includes(country))
+  );
+
+  setOptions(geoFilter, availableCountries, stillValidSelections);
 }
 
 function getSelectedValues(select) {
@@ -191,17 +227,17 @@ function sortFaculty(a, b) {
 }
 
 function render() {
+  const departmentMatches = getDepartmentMatches();
+
+  updateCountryFilterOptions(departmentMatches);
   const selectedGeos = getSelectedValues(geoFilter);
 
-  const filtered = allFaculty.filter((person) => {
-    const departmentPasses =
-      selectedDepartments.size === 0 || selectedDepartments.has(person.department);
-
+  const filtered = departmentMatches.filter((person) => {
     const geoPasses =
       selectedGeos.size === 0 ||
       person.countries.some((token) => selectedGeos.has(token));
 
-    return departmentPasses && geoPasses;
+    return geoPasses;
   });
 
   statusEl.textContent = `Showing ${filtered.length} of ${allFaculty.length} faculty members.`;
@@ -232,7 +268,7 @@ function renderCard(person) {
 }
 
 function escapeHtml(value) {
-  return value
+  return String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
