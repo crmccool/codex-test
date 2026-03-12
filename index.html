@@ -11,7 +11,7 @@
       <header>
         <h1>Faculty Profile Filter</h1>
         <p>
-          Select one or more departments and countries/regions. Filters use
+          Select one or more departments and countries. Filters use
           <strong>OR</strong> logic within each group and <strong>AND</strong>
           logic across groups.
         </p>
@@ -19,12 +19,17 @@
 
       <section class="controls" aria-label="Filters">
         <div class="control-group">
-          <label for="departmentFilter">Departments / disciplines</label>
-          <select id="departmentFilter" multiple size="8"></select>
+          <span>Departments / disciplines</span>
+          <div
+            id="departmentFilter"
+            class="chip-list"
+            role="group"
+            aria-label="Departments / disciplines"
+          ></div>
         </div>
 
         <div class="control-group">
-          <label for="geoFilter">Countries and regions</label>
+          <label for="geoFilter">Countries</label>
           <select id="geoFilter" multiple size="8"></select>
         </div>
 
@@ -43,16 +48,15 @@
           <li>
             Data columns are read directly from the CSV headers:
             <code>name</code>, <code>primary_department</code>,
-            <code>countries_normalized</code>, <code>regions_derived</code>,
-            and <code>focus_areas</code>.
+            <code>countries_normalized</code>, and
+            <code>focus_areas</code>.
           </li>
           <li>
-            <code>countries_normalized</code> and <code>regions_derived</code>
-            values are split on commas into separate tokens.
+            <code>countries_normalized</code> values are split on commas into
+            separate tokens.
           </li>
           <li>
-            The geography filter matches against both country tokens and region
-            tokens in one list.
+            The geography filter matches country tokens only.
           </li>
         </ul>
       </details>

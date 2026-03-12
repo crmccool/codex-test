@@ -7,6 +7,7 @@ const resultsContainer = document.getElementById("results");
 const statusEl = document.getElementById("status");
 
 let allFaculty = [];
+const selectedDepartments = new Set();
 
 init();
 
@@ -34,10 +35,13 @@ async function init() {
 }
 
 function bindEvents() {
-  departmentFilter.addEventListener("change", render);
   geoFilter.addEventListener("change", render);
   clearBtn.addEventListener("click", () => {
-    clearSelection(departmentFilter);
+    selectedDepartments.clear();
+    Array.from(departmentFilter.querySelectorAll("button")).forEach((button) => {
+      button.classList.remove("active");
+      button.setAttribute("aria-pressed", "false");
+    });
     clearSelection(geoFilter);
     render();
   });
@@ -101,14 +105,11 @@ function parseCsv(text) {
 
 function normalizeRow(row) {
   const countries = splitTokens(row.countries_normalized);
-  const regions = splitTokens(row.regions_derived);
 
   return {
     name: row.name || "",
     department: row.primary_department || "",
     countries,
-    regions,
-    geoTokens: [...new Set([...countries, ...regions])],
     description: row.focus_areas || "",
   };
 }
@@ -127,9 +128,9 @@ function populateFilters(facultyList) {
   const departments = uniqueSorted(
     facultyList.map((f) => f.department).filter(Boolean)
   );
-  const geos = uniqueSorted(facultyList.flatMap((f) => f.geoTokens));
+  const geos = uniqueSorted(facultyList.flatMap((f) => f.countries));
 
-  addOptions(departmentFilter, departments);
+  addDepartmentButtons(departments);
   addOptions(geoFilter, geos);
 }
 
@@ -145,6 +146,30 @@ function addOptions(select, values) {
     option.value = value;
     option.textContent = value;
     select.appendChild(option);
+  });
+}
+
+function addDepartmentButtons(values) {
+  values.forEach((value) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "chip";
+    button.textContent = value;
+    button.dataset.value = value;
+    button.setAttribute("aria-pressed", "false");
+    button.addEventListener("click", () => {
+      if (selectedDepartments.has(value)) {
+        selectedDepartments.delete(value);
+        button.classList.remove("active");
+        button.setAttribute("aria-pressed", "false");
+      } else {
+        selectedDepartments.add(value);
+        button.classList.add("active");
+        button.setAttribute("aria-pressed", "true");
+      }
+      render();
+    });
+    departmentFilter.appendChild(button);
   });
 }
 
@@ -166,7 +191,6 @@ function sortFaculty(a, b) {
 }
 
 function render() {
-  const selectedDepartments = getSelectedValues(departmentFilter);
   const selectedGeos = getSelectedValues(geoFilter);
 
   const filtered = allFaculty.filter((person) => {
@@ -175,7 +199,7 @@ function render() {
 
     const geoPasses =
       selectedGeos.size === 0 ||
-      person.geoTokens.some((token) => selectedGeos.has(token));
+      person.countries.some((token) => selectedGeos.has(token));
 
     return departmentPasses && geoPasses;
   });
@@ -195,9 +219,6 @@ function renderCard(person) {
   const countryText = person.countries.length
     ? person.countries.join(", ")
     : "Not specified";
-  const regionText = person.regions.length
-    ? person.regions.join(", ")
-    : "Not specified";
   const descriptionText = person.description || "No description provided.";
 
   return `
@@ -205,7 +226,6 @@ function renderCard(person) {
       <h2>${escapeHtml(person.name)}</h2>
       <p class="meta"><strong>Department:</strong> ${escapeHtml(departmentText)}</p>
       <p class="meta"><strong>Countries:</strong> ${escapeHtml(countryText)}</p>
-      <p class="meta"><strong>Regions:</strong> ${escapeHtml(regionText)}</p>
       <p class="description">${escapeHtml(descriptionText)}</p>
     </article>
   `;
