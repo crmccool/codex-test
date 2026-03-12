@@ -46,7 +46,17 @@ header p {
   gap: 0.5rem;
 }
 
-label {
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  max-height: 13rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+label,
+.control-group > span {
   font-weight: 600;
 }
 
@@ -74,6 +84,24 @@ button {
 
 button:hover {
   background: #1d4ed8;
+}
+
+.chip {
+  border: 1px solid #9ca3af;
+  background: #fff;
+  color: #1f2937;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+}
+
+.chip:hover {
+  background: #f3f4f6;
+}
+
+.chip.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
 }
 
 .status {
