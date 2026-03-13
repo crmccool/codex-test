@@ -8,23 +8,42 @@
   </head>
   <body>
     <main class="container">
-      <header>
-        <h1>Faculty Profile Filter</h1>
+      <header class="hero">
+        <h1>Faculty Profile Explorer</h1>
         <p>
-          Select one or more departments and countries/regions. Filters use
+          Select one or more departments and countries. Filters use
           <strong>OR</strong> logic within each group and <strong>AND</strong>
           logic across groups.
         </p>
       </header>
 
-      <section class="controls" aria-label="Filters">
+      <section class="controls panel" aria-label="Filters">
         <div class="control-group">
-          <label for="departmentFilter">Departments / disciplines</label>
-          <select id="departmentFilter" multiple size="8"></select>
+          <span>Departments / disciplines</span>
+          <input
+            id="departmentSearch"
+            class="filter-search"
+            type="search"
+            placeholder="Search departments…"
+            aria-label="Search departments"
+          />
+          <div
+            id="departmentFilter"
+            class="chip-list"
+            role="group"
+            aria-label="Departments / disciplines"
+          ></div>
         </div>
 
         <div class="control-group">
-          <label for="geoFilter">Countries and regions</label>
+          <label for="geoFilter">Countries</label>
+          <input
+            id="countrySearch"
+            class="filter-search"
+            type="search"
+            placeholder="Search countries…"
+            aria-label="Search countries"
+          />
           <select id="geoFilter" multiple size="8"></select>
         </div>
 
@@ -33,7 +52,24 @@
         </div>
       </section>
 
-      <p id="status" class="status">Loading faculty data…</p>
+      <section class="map-panel panel" aria-label="Country map filter">
+        <h2>Country map</h2>
+        <p class="map-help">
+          Click a country shape on the map to toggle it in the country filter.
+        </p>
+        <svg
+          id="worldMap"
+          class="world-map"
+          viewBox="0 0 1000 500"
+          role="img"
+          aria-label="Clickable world map for country filter"
+        >
+          <g id="mapBase" class="map-land" aria-hidden="true"></g>
+          <g id="mapCountries"></g>
+        </svg>
+      </section>
+
+      <p id="status" class="status panel">Loading faculty data…</p>
 
       <section id="results" class="results" aria-live="polite"></section>
 
@@ -43,16 +79,15 @@
           <li>
             Data columns are read directly from the CSV headers:
             <code>name</code>, <code>primary_department</code>,
-            <code>countries_normalized</code>, <code>regions_derived</code>,
-            and <code>focus_areas</code>.
+            <code>countries_normalized</code>, and
+            <code>focus_areas</code>.
           </li>
           <li>
-            <code>countries_normalized</code> and <code>regions_derived</code>
-            values are split on commas into separate tokens.
+            <code>countries_normalized</code> values are split on commas into
+            separate tokens.
           </li>
           <li>
-            The geography filter matches against both country tokens and region
-            tokens in one list.
+            The geography filter matches country tokens only.
           </li>
         </ul>
       </details>
