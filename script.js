@@ -298,7 +298,7 @@ function applyDepartmentSearchFilter() {
   buttons.forEach((button) => {
     const matches =
       departmentSearchTerm.length === 0 ||
-      button.textContent.toLowerCase().includes(departmentSearchTerm);
+      button.dataset.value.toLowerCase().includes(departmentSearchTerm);
     button.hidden = !matches;
   });
 }
@@ -312,15 +312,50 @@ function applyCountrySearchFilter() {
   });
 }
 
-function setOptions(select, values, selectedValues = new Set()) {
+function setOptions(select, values, selectedValues = new Set(), countsByValue = new Map()) {
   select.innerHTML = "";
   values.forEach((value) => {
     const option = document.createElement("option");
     option.value = value;
-    option.textContent = value;
+    const count = countsByValue.get(value) || 0;
+    option.textContent = `${value} (${count})`;
     option.selected = selectedValues.has(value);
     select.appendChild(option);
   });
+}
+
+function computeDepartmentCounts(selectedCountries) {
+  const counts = new Map();
+  const countryMatches = getCountryMatches(selectedCountries);
+
+  countryMatches.forEach((person) => {
+    if (!person.department) {
+      return;
+    }
+    counts.set(person.department, (counts.get(person.department) || 0) + 1);
+  });
+
+  return counts;
+}
+
+function updateDepartmentChipCounts(countsByDepartment) {
+  Array.from(departmentFilter.querySelectorAll("button")).forEach((button) => {
+    const label = button.dataset.value;
+    const count = countsByDepartment.get(label) || 0;
+    button.textContent = `${label} (${count})`;
+  });
+}
+
+function computeCountryCounts(facultyList) {
+  const counts = new Map();
+
+  facultyList.forEach((person) => {
+    person.countries.forEach((country) => {
+      counts.set(country, (counts.get(country) || 0) + 1);
+    });
+  });
+
+  return counts;
 }
 
 function getCountryMatches(selectedCountries) {
@@ -371,8 +406,9 @@ function updateCountryFilterOptions(departmentMatches) {
   const stillValidSelections = new Set(
     [...selectedGeos].filter((country) => availableCountries.includes(country))
   );
+  const countryCounts = computeCountryCounts(departmentMatches);
 
-  setOptions(geoFilter, availableCountries, stillValidSelections);
+  setOptions(geoFilter, availableCountries, stillValidSelections, countryCounts);
 }
 
 async function initializeWorldMap() {
@@ -643,6 +679,8 @@ function sortFaculty(a, b) {
 
 function render() {
   const selectedCountriesBeforeUpdate = getSelectedValues(geoFilter);
+  const departmentCounts = computeDepartmentCounts(selectedCountriesBeforeUpdate);
+  updateDepartmentChipCounts(departmentCounts);
   updateDepartmentFilterOptions(selectedCountriesBeforeUpdate);
   applyDepartmentSearchFilter();
 
