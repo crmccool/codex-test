@@ -163,6 +163,19 @@ button:hover {
   box-shadow: 0 6px 14px rgba(0, 39, 76, 0.35);
 }
 
+.chip.unavailable {
+  opacity: 0.42;
+  cursor: not-allowed;
+  border-color: #c7d2df;
+  background: #eef2f7;
+  color: #64748b;
+  box-shadow: none;
+}
+
+.chip.unavailable:hover {
+  background: #eef2f7;
+}
+
 .map-panel {
   margin-top: 1rem;
   padding: 1rem 1rem 1.15rem;
