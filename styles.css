@@ -85,7 +85,6 @@ label,
   padding: 0.05rem 0.15rem 0.05rem 0;
 }
 
-
 .filter-search {
   width: 100%;
   border: 1px solid #b6c2d2;
@@ -176,7 +175,6 @@ button:hover {
 .chip.unavailable:hover {
   background: #eef2f7;
 }
-
 
 .active-filters {
   margin-top: 0.85rem;

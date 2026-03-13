@@ -144,8 +144,10 @@ function bindEvents() {
   clearBtn.addEventListener("click", () => {
     selectedDepartments.clear();
     Array.from(departmentFilter.querySelectorAll("button")).forEach((button) => {
-      button.classList.remove("active");
+      button.classList.remove("active", "unavailable");
+      button.disabled = false;
       button.setAttribute("aria-pressed", "false");
+      button.setAttribute("aria-disabled", "false");
     });
     clearSelection(geoFilter);
     departmentSearch.value = "";
@@ -228,6 +230,7 @@ function splitTokens(value) {
   if (!value) {
     return [];
   }
+
   return value
     .split(",")
     .map((part) => part.trim())
@@ -269,6 +272,7 @@ function addDepartmentButtons(values) {
     button.textContent = value;
     button.dataset.value = value;
     button.setAttribute("aria-pressed", "false");
+
     button.addEventListener("click", () => {
       if (button.classList.contains("unavailable")) {
         return;
@@ -284,6 +288,7 @@ function addDepartmentButtons(values) {
       }
       render();
     });
+
     departmentFilter.appendChild(button);
   });
 }
@@ -682,15 +687,14 @@ function render() {
   updateCountryFilterOptions(departmentMatches);
   applyCountrySearchFilter();
 
-  const selectedGeos = getSelectedValues(geoFilter);
-  updateDepartmentFilterOptions(selectedGeos);
+  const selectedCountries = getSelectedValues(geoFilter);
+  updateDepartmentFilterOptions(selectedCountries);
   applyDepartmentSearchFilter();
 
   departmentMatches = getDepartmentMatches();
   updateCountryFilterOptions(departmentMatches);
   applyCountrySearchFilter();
 
-  const selectedCountries = getSelectedValues(geoFilter);
   const availableCountries = new Set(Array.from(geoFilter.options, (opt) => opt.value));
   updateMapSelection(selectedCountries, availableCountries);
 
@@ -816,7 +820,7 @@ function renderCard(person) {
 }
 
 function escapeHtml(value) {
-  return value
+  return String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
