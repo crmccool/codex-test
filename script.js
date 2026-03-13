@@ -4,6 +4,8 @@ const WORLD_MAP_FILE = "world-atlas-countries-110m.json";
 const departmentFilter = document.getElementById("departmentFilter");
 const geoFilter = document.getElementById("geoFilter");
 const clearBtn = document.getElementById("clearBtn");
+const departmentSearch = document.getElementById("departmentSearch");
+const countrySearch = document.getElementById("countrySearch");
 const resultsContainer = document.getElementById("results");
 const statusEl = document.getElementById("status");
 const mapBaseLayer = document.getElementById("mapBase");
@@ -13,6 +15,8 @@ let allFaculty = [];
 const selectedDepartments = new Set();
 let allCountries = [];
 const mapCountryElements = new Map();
+let departmentSearchTerm = "";
+let countrySearchTerm = "";
 
 const COUNTRY_COORDINATES = {
   Argentina: [-64, -34],
@@ -128,6 +132,14 @@ async function init() {
 
 function bindEvents() {
   geoFilter.addEventListener("change", render);
+  departmentSearch.addEventListener("input", () => {
+    departmentSearchTerm = departmentSearch.value.trim().toLowerCase();
+    applyDepartmentSearchFilter();
+  });
+  countrySearch.addEventListener("input", () => {
+    countrySearchTerm = countrySearch.value.trim().toLowerCase();
+    applyCountrySearchFilter();
+  });
   clearBtn.addEventListener("click", () => {
     selectedDepartments.clear();
     Array.from(departmentFilter.querySelectorAll("button")).forEach((button) => {
@@ -135,6 +147,11 @@ function bindEvents() {
       button.setAttribute("aria-pressed", "false");
     });
     clearSelection(geoFilter);
+    departmentSearch.value = "";
+    countrySearch.value = "";
+    departmentSearchTerm = "";
+    countrySearchTerm = "";
+    applyDepartmentSearchFilter();
     render();
   });
 }
@@ -225,6 +242,8 @@ function populateFilters(facultyList) {
 
   addDepartmentButtons(departments);
   addOptions(geoFilter, allCountries);
+  applyDepartmentSearchFilter();
+  applyCountrySearchFilter();
 }
 
 function uniqueSorted(items) {
@@ -265,6 +284,25 @@ function addDepartmentButtons(values) {
     });
 
     departmentFilter.appendChild(button);
+  });
+}
+
+function applyDepartmentSearchFilter() {
+  const buttons = Array.from(departmentFilter.querySelectorAll("button"));
+  buttons.forEach((button) => {
+    const matches =
+      departmentSearchTerm.length === 0 ||
+      button.textContent.toLowerCase().includes(departmentSearchTerm);
+    button.hidden = !matches;
+  });
+}
+
+function applyCountrySearchFilter() {
+  Array.from(geoFilter.options).forEach((option) => {
+    const matches =
+      countrySearchTerm.length === 0 ||
+      option.value.toLowerCase().includes(countrySearchTerm);
+    option.hidden = !matches;
   });
 }
 
@@ -543,6 +581,7 @@ function render() {
   const departmentMatches = getDepartmentMatches();
 
   updateCountryFilterOptions(departmentMatches);
+  applyCountrySearchFilter();
   const selectedGeos = getSelectedValues(geoFilter);
   const availableCountries = new Set(Array.from(geoFilter.options, (opt) => opt.value));
   updateMapSelection(selectedGeos, availableCountries);
@@ -555,7 +594,9 @@ function render() {
     return geoPasses;
   });
 
-  statusEl.textContent = `Showing ${filtered.length} of ${allFaculty.length} faculty members.`;
+  const selectedDepartmentList = Array.from(selectedDepartments);
+  const selectedCountryList = Array.from(selectedGeos);
+  statusEl.textContent = `Showing ${filtered.length} of ${allFaculty.length} faculty members. ${buildFilterSummary(selectedDepartmentList, selectedCountryList)}`;
 
   if (filtered.length === 0) {
     resultsContainer.innerHTML = "<p>No faculty match the current filters.</p>";
@@ -563,6 +604,33 @@ function render() {
   }
 
   resultsContainer.innerHTML = filtered.map(renderCard).join("");
+}
+
+function buildFilterSummary(selectedDepartmentList, selectedCountryList) {
+  if (selectedDepartmentList.length === 0 && selectedCountryList.length === 0) {
+    return "No active filters.";
+  }
+
+  const departmentText =
+    selectedDepartmentList.length === 0
+      ? "Departments: all"
+      : `Departments: ${formatFilterList(selectedDepartmentList)}`;
+
+  const countryText =
+    selectedCountryList.length === 0
+      ? "Countries: all"
+      : `Countries: ${formatFilterList(selectedCountryList)}`;
+
+  return `Active filters → ${departmentText}; ${countryText}.`;
+}
+
+function formatFilterList(values) {
+  const maxItems = 4;
+  if (values.length <= maxItems) {
+    return values.join(", ");
+  }
+  const shown = values.slice(0, maxItems).join(", ");
+  return `${shown}, +${values.length - maxItems} more`;
 }
 
 function renderCard(person) {

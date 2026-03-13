@@ -85,6 +85,24 @@ label,
   padding: 0.05rem 0.15rem 0.05rem 0;
 }
 
+.filter-search {
+  width: 100%;
+  border: 1px solid #b6c2d2;
+  border-radius: 10px;
+  padding: 0.5rem 0.65rem;
+  background: #fff;
+  color: #111827;
+}
+
+.filter-search::placeholder {
+  color: #64748b;
+}
+
+.filter-search:focus {
+  outline: 3px solid rgba(37, 99, 235, 0.2);
+  border-color: #7aa2ee;
+}
+
 select {
   width: 100%;
   border: 1px solid #b6c2d2;
