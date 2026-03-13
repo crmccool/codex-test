@@ -8,6 +8,7 @@ const departmentSearch = document.getElementById("departmentSearch");
 const countrySearch = document.getElementById("countrySearch");
 const resultsContainer = document.getElementById("results");
 const statusEl = document.getElementById("status");
+const activeFiltersEl = document.getElementById("activeFilters");
 const mapBaseLayer = document.getElementById("mapBase");
 const mapCountriesLayer = document.getElementById("mapCountries");
 
@@ -276,7 +277,6 @@ function addDepartmentButtons(values) {
       if (button.classList.contains("unavailable")) {
         return;
       }
-
       if (selectedDepartments.has(value)) {
         selectedDepartments.delete(value);
         button.classList.remove("active");
@@ -473,7 +473,6 @@ function makeMapCountryInteractive(element, country) {
       toggleCountrySelection(country);
     }
   });
-
   element.addEventListener("keydown", (event) => {
     if (!element.classList.contains("available")) {
       return;
@@ -709,6 +708,7 @@ function render() {
 
   const selectedDepartmentList = Array.from(selectedDepartments);
   const selectedCountryList = Array.from(selectedCountries);
+  renderActiveFilterPills(selectedDepartmentList, selectedCountryList);
   statusEl.textContent = `Showing ${filtered.length} of ${allFaculty.length} faculty members. ${buildFilterSummary(selectedDepartmentList, selectedCountryList)}`;
 
   if (filtered.length === 0) {
@@ -744,6 +744,62 @@ function formatFilterList(values) {
   }
   const shown = values.slice(0, maxItems).join(", ");
   return `${shown}, +${values.length - maxItems} more`;
+}
+
+function renderActiveFilterPills(selectedDepartmentList, selectedCountryList) {
+  activeFiltersEl.innerHTML = "";
+
+  if (selectedDepartmentList.length === 0 && selectedCountryList.length === 0) {
+    activeFiltersEl.hidden = true;
+    return;
+  }
+
+  activeFiltersEl.hidden = false;
+
+  selectedDepartmentList.forEach((department) => {
+    activeFiltersEl.appendChild(
+      createFilterPill(`Department: ${department}`, () => {
+        selectedDepartments.delete(department);
+        const button = departmentFilter.querySelector(`button[data-value="${CSS.escape(department)}"]`);
+        if (button) {
+          button.classList.remove("active");
+          button.setAttribute("aria-pressed", "false");
+        }
+        render();
+      })
+    );
+  });
+
+  selectedCountryList.forEach((country) => {
+    activeFiltersEl.appendChild(
+      createFilterPill(`Country: ${country}`, () => {
+        const option = Array.from(geoFilter.options).find((opt) => opt.value === country);
+        if (option) {
+          option.selected = false;
+        }
+        render();
+      })
+    );
+  });
+}
+
+function createFilterPill(label, onRemove) {
+  const pill = document.createElement("span");
+  pill.className = "filter-pill";
+
+  const text = document.createElement("span");
+  text.textContent = label;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "pill-remove";
+  removeBtn.setAttribute("aria-label", `Remove ${label} filter`);
+  removeBtn.textContent = "×";
+  removeBtn.addEventListener("click", onRemove);
+
+  pill.appendChild(text);
+  pill.appendChild(removeBtn);
+  return pill;
 }
 
 function renderCard(person) {
