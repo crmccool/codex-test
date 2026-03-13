@@ -520,25 +520,52 @@ function combineArcs(arcIndexes, decodedArcs) {
 
 function polygonsToPath(polygons) {
   return polygons
-    .map((rings) =>
-      rings
-        .map((ring) =>
-          ring
-            .map((point, index) => {
-              const [x, y] = projectLonLat(point);
-              return `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
-            })
-            .join(" ") + " Z"
-        )
-        .join(" ")
-    )
+    .map((rings) => rings.map((ring) => ringToPath(ring)).join(" "))
     .join(" ");
 }
 
+function ringToPath(ring) {
+  if (ring.length === 0) {
+    return "";
+  }
+
+  const commands = [];
+  let previousLongitude = null;
+  let segments = 1;
+
+  ring.forEach((point, index) => {
+    const [longitude] = point;
+    const [x, y] = projectLonLat(point);
+
+    if (index === 0) {
+      commands.push(`M${x.toFixed(2)},${y.toFixed(2)}`);
+      previousLongitude = longitude;
+      return;
+    }
+
+    if (previousLongitude !== null && Math.abs(longitude - previousLongitude) > 180) {
+      commands.push(`M${x.toFixed(2)},${y.toFixed(2)}`);
+      segments += 1;
+    } else {
+      commands.push(`L${x.toFixed(2)},${y.toFixed(2)}`);
+    }
+
+    previousLongitude = longitude;
+  });
+
+  if (segments === 1) {
+    commands.push("Z");
+  }
+
+  return commands.join(" ");
+}
+
 function projectLonLat([longitude, latitude]) {
-  const x = ((longitude + 180) / 360) * 1000;
-  const y = ((90 - latitude) / 180) * 500;
-  return [Math.max(0, Math.min(1000, x)), Math.max(0, Math.min(500, y))];
+  const normalizedLongitude = ((longitude + 540) % 360) - 180;
+  const clampedLatitude = Math.max(-90, Math.min(90, latitude));
+  const x = ((normalizedLongitude + 180) / 360) * 1000;
+  const y = ((90 - clampedLatitude) / 180) * 500;
+  return [x, y];
 }
 
 function projectCountry(country) {
