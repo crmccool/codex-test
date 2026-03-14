@@ -263,7 +263,7 @@ button:hover {
 }
 
 .map-country.available {
-  fill: #bac9dd;
+  fill: #8fa8c7;
   cursor: pointer;
 }
 
@@ -275,14 +275,14 @@ button:hover {
 
 .map-country.selected {
   fill: var(--dot-selected);
-  stroke: #9a6700;
-  stroke-width: 1.7;
+  stroke: rgba(0, 39, 76, 0.28);
+  stroke-width: 0.8;
 }
 
 .map-country.selected:hover {
   fill: var(--dot-selected);
-  stroke: #7a5000;
-  stroke-width: 2;
+  stroke: rgba(0, 39, 76, 0.32);
+  stroke-width: 1;
 }
 
 .map-country.unavailable {
