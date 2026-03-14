@@ -570,27 +570,37 @@ function ringToPath(ring) {
   }
 
   const commands = [];
-  let previousLongitude = null;
+  let previousNormalizedLongitude = null;
+  let previousX = null;
   let segments = 1;
 
   ring.forEach((point, index) => {
     const [longitude] = point;
+    const normalizedLongitude = ((longitude + 540) % 360) - 180;
     const [x, y] = projectLonLat(point);
 
     if (index === 0) {
       commands.push(`M${x.toFixed(2)},${y.toFixed(2)}`);
-      previousLongitude = longitude;
+      previousNormalizedLongitude = normalizedLongitude;
+      previousX = x;
       return;
     }
 
-    if (previousLongitude !== null && Math.abs(longitude - previousLongitude) > 180) {
+    const wrapsAcrossMapSeam =
+      previousNormalizedLongitude !== null &&
+      Math.abs(normalizedLongitude - previousNormalizedLongitude) > 180;
+    const hasLargeProjectedJump =
+      previousX !== null && Math.abs(x - previousX) > 500;
+
+    if (wrapsAcrossMapSeam || hasLargeProjectedJump) {
       commands.push(`M${x.toFixed(2)},${y.toFixed(2)}`);
       segments += 1;
     } else {
       commands.push(`L${x.toFixed(2)},${y.toFixed(2)}`);
     }
 
-    previousLongitude = longitude;
+    previousNormalizedLongitude = normalizedLongitude;
+    previousX = x;
   });
 
   if (segments === 1) {
