@@ -731,7 +731,9 @@ function render() {
     return;
   }
 
-  resultsContainer.innerHTML = filtered.map(renderCard).join("");
+  resultsContainer.innerHTML = filtered
+    .map((person) => renderCard(person, selectedCountries))
+    .join("");
 }
 
 function buildFilterSummary(selectedDepartmentList, selectedCountryList) {
@@ -817,21 +819,35 @@ function createFilterPill(label, onRemove) {
   return pill;
 }
 
-function renderCard(person) {
+function renderCard(person, selectedCountries = new Set()) {
   const departmentText = person.department || "Not specified";
-  const countryText = person.countries.length
-    ? person.countries.join(", ")
-    : "Not specified";
+  const countryText = renderCountries(person.countries, selectedCountries);
   const descriptionText = person.description || "No description provided.";
 
   return `
     <article class="card">
       <h2>${escapeHtml(person.name)}</h2>
       <p class="meta"><strong>Department:</strong> ${escapeHtml(departmentText)}</p>
-      <p class="meta"><strong>Countries:</strong> ${escapeHtml(countryText)}</p>
+      <p class="meta"><strong>Countries:</strong> ${countryText}</p>
       <p class="description">${escapeHtml(descriptionText)}</p>
     </article>
   `;
+}
+
+function renderCountries(countries, selectedCountries) {
+  if (!countries.length) {
+    return "Not specified";
+  }
+
+  return countries
+    .map((country) => {
+      const countryLabel = escapeHtml(country);
+      if (selectedCountries.size > 0 && selectedCountries.has(country)) {
+        return `<span class="country-match">${countryLabel}</span>`;
+      }
+      return countryLabel;
+    })
+    .join(", ");
 }
 
 function escapeHtml(value) {
