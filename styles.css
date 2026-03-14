@@ -63,6 +63,10 @@ header p {
   padding: 1.15rem;
 }
 
+.control-group-keyword {
+  grid-column: 1 / -1;
+}
+
 .control-group {
   display: flex;
   flex-direction: column;
