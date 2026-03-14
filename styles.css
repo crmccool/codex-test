@@ -255,33 +255,39 @@ button:hover {
 }
 
 .map-country {
-  fill: #7b8798;
-  stroke: rgba(255, 255, 255, 0.96);
-  stroke-width: 1.15;
+  fill: #cdd7e5;
+  stroke: rgba(255, 255, 255, 0.95);
+  stroke-width: 1;
   vector-effect: non-scaling-stroke;
   transition: fill 120ms ease, stroke 120ms ease, stroke-width 120ms ease, opacity 120ms ease;
 }
 
 .map-country.available {
-  fill: #003a70;
+  fill: #bac9dd;
   cursor: pointer;
 }
 
 .map-country.available:hover {
-  fill: var(--primary-dark);
-  stroke: #ffcb05;
+  fill: var(--primary);
+  stroke: #001a33;
   stroke-width: 1.5;
 }
 
 .map-country.selected {
   fill: var(--dot-selected);
-  stroke: #7c2d12;
-  stroke-width: 1.9;
+  stroke: #9a6700;
+  stroke-width: 1.7;
+}
+
+.map-country.selected:hover {
+  fill: var(--dot-selected);
+  stroke: #7a5000;
+  stroke-width: 2;
 }
 
 .map-country.unavailable {
-  fill: #acb8c7;
-  opacity: 0.45;
+  fill: #e7edf5;
+  opacity: 0.95;
 }
 
 .fallback-country {
