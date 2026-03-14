@@ -332,6 +332,14 @@ button:hover {
   margin-top: 0.2rem;
 }
 
+.country-match {
+  background: var(--dot-selected);
+  color: #1f2937;
+  font-weight: 700;
+  padding: 0 0.2rem;
+  border-radius: 4px;
+}
+
 .description {
   margin-top: 0.65rem;
   color: #1e293b;
