@@ -11,15 +11,15 @@
       <header class="hero">
         <h1>Faculty Profile Explorer</h1>
         <p>
-          Select one or more departments and countries. Filters use
-          <strong>OR</strong> logic within each group and <strong>AND</strong>
-          logic across groups.
+          Choose departments and countries to filter results. Multiple
+          selections within a group use OR logic; selections across groups use
+          AND logic.
         </p>
       </header>
 
       <section class="controls panel" aria-label="Filters">
         <div class="control-group">
-          <span>Departments / disciplines</span>
+          <span>Departments</span>
           <input
             id="departmentSearch"
             class="filter-search"
@@ -31,7 +31,7 @@
             id="departmentFilter"
             class="chip-list"
             role="group"
-            aria-label="Departments / disciplines"
+            aria-label="Departments"
           ></div>
         </div>
 
@@ -55,9 +55,10 @@
       <section id="activeFilters" class="active-filters panel" aria-label="Active filters"></section>
 
       <section class="map-panel panel" aria-label="Country map filter">
-        <h2>Country map</h2>
+        <h2>World Map</h2>
         <p class="map-help">
-          Click a country shape on the map to toggle it in the country filter.
+          Click a country on the map to add or remove it from the country
+          filter.
         </p>
         <svg
           id="worldMap"
@@ -74,25 +75,6 @@
       <p id="status" class="status panel">Loading faculty data…</p>
 
       <section id="results" class="results" aria-live="polite"></section>
-
-      <details class="assumptions">
-        <summary>CSV cleaning assumptions used</summary>
-        <ul>
-          <li>
-            Data columns are read directly from the CSV headers:
-            <code>name</code>, <code>primary_department</code>,
-            <code>countries_normalized</code>, and
-            <code>focus_areas</code>.
-          </li>
-          <li>
-            <code>countries_normalized</code> values are split on commas into
-            separate tokens.
-          </li>
-          <li>
-            The geography filter matches country tokens only.
-          </li>
-        </ul>
-      </details>
     </main>
 
     <script src="script.js"></script>
