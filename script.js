@@ -6,6 +6,7 @@ const geoFilter = document.getElementById("geoFilter");
 const clearBtn = document.getElementById("clearBtn");
 const departmentSearch = document.getElementById("departmentSearch");
 const countrySearch = document.getElementById("countrySearch");
+const keywordSearch = document.getElementById("keywordSearch");
 const resultsContainer = document.getElementById("results");
 const statusEl = document.getElementById("status");
 const activeFiltersEl = document.getElementById("activeFilters");
@@ -18,6 +19,7 @@ let allCountries = [];
 const mapCountryElements = new Map();
 let departmentSearchTerm = "";
 let countrySearchTerm = "";
+let keywordSearchTerm = "";
 
 const COUNTRY_COORDINATES = {
   Argentina: [-64, -34],
@@ -143,6 +145,10 @@ function bindEvents() {
     countrySearchTerm = countrySearch.value.trim().toLowerCase();
     applyCountrySearchFilter();
   });
+  keywordSearch.addEventListener("input", () => {
+    keywordSearchTerm = keywordSearch.value.trim();
+    render();
+  });
   clearBtn.addEventListener("click", () => {
     selectedDepartments.clear();
     Array.from(departmentFilter.querySelectorAll("button")).forEach((button) => {
@@ -154,8 +160,10 @@ function bindEvents() {
     clearSelection(geoFilter);
     departmentSearch.value = "";
     countrySearch.value = "";
+    keywordSearch.value = "";
     departmentSearchTerm = "";
     countrySearchTerm = "";
+    keywordSearchTerm = "";
     applyDepartmentSearchFilter();
     render();
   });
@@ -392,10 +400,35 @@ function updateDepartmentFilterOptions(selectedCountries) {
 }
 
 function getDepartmentMatches() {
-  return allFaculty.filter(
-    (person) =>
-      selectedDepartments.size === 0 || selectedDepartments.has(person.department)
-  );
+  return allFaculty.filter((person) => {
+    const departmentPasses =
+      selectedDepartments.size === 0 || selectedDepartments.has(person.department);
+
+    if (!departmentPasses) {
+      return false;
+    }
+
+    return keywordMatchesPerson(person, keywordSearchTerm);
+  });
+}
+
+function keywordMatchesPerson(person, keywordTerm) {
+  const normalizedKeywordTerm = keywordTerm.toLowerCase();
+
+  if (!normalizedKeywordTerm) {
+    return true;
+  }
+
+  const haystack = [
+    person.name,
+    person.department,
+    person.description,
+    person.countries.join(" "),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(normalizedKeywordTerm);
 }
 
 function updateCountryFilterOptions(departmentMatches) {
@@ -723,8 +756,8 @@ function render() {
 
   const selectedDepartmentList = Array.from(selectedDepartments);
   const selectedCountryList = Array.from(selectedCountries);
-  renderActiveFilterPills(selectedDepartmentList, selectedCountryList);
-  statusEl.textContent = `Showing ${filtered.length} of ${allFaculty.length} faculty members. ${buildFilterSummary(selectedDepartmentList, selectedCountryList)}`;
+  renderActiveFilterPills(selectedDepartmentList, selectedCountryList, keywordSearchTerm);
+  statusEl.textContent = `Showing ${filtered.length} of ${allFaculty.length} faculty members. ${buildFilterSummary(selectedDepartmentList, selectedCountryList, keywordSearchTerm)}`;
 
   if (filtered.length === 0) {
     resultsContainer.innerHTML = "<p>No faculty match the current filters.</p>";
@@ -736,8 +769,8 @@ function render() {
     .join("");
 }
 
-function buildFilterSummary(selectedDepartmentList, selectedCountryList) {
-  if (selectedDepartmentList.length === 0 && selectedCountryList.length === 0) {
+function buildFilterSummary(selectedDepartmentList, selectedCountryList, keywordTerm) {
+  if (selectedDepartmentList.length === 0 && selectedCountryList.length === 0 && !keywordTerm) {
     return "No active filters.";
   }
 
@@ -751,7 +784,9 @@ function buildFilterSummary(selectedDepartmentList, selectedCountryList) {
       ? "Countries: all"
       : `Countries: ${formatFilterList(selectedCountryList)}`;
 
-  return `Active filters → ${departmentText}; ${countryText}.`;
+  const keywordText = keywordTerm ? `Keyword: ${keywordTerm}` : "Keyword: all";
+
+  return `Active filters → ${departmentText}; ${countryText}; ${keywordText}.`;
 }
 
 function formatFilterList(values) {
@@ -763,15 +798,25 @@ function formatFilterList(values) {
   return `${shown}, +${values.length - maxItems} more`;
 }
 
-function renderActiveFilterPills(selectedDepartmentList, selectedCountryList) {
+function renderActiveFilterPills(selectedDepartmentList, selectedCountryList, keywordTerm) {
   activeFiltersEl.innerHTML = "";
 
-  if (selectedDepartmentList.length === 0 && selectedCountryList.length === 0) {
+  if (selectedDepartmentList.length === 0 && selectedCountryList.length === 0 && !keywordTerm) {
     activeFiltersEl.hidden = true;
     return;
   }
 
   activeFiltersEl.hidden = false;
+
+  if (keywordTerm) {
+    activeFiltersEl.appendChild(
+      createFilterPill(`Keyword: ${keywordTerm}`, () => {
+        keywordSearchTerm = "";
+        keywordSearch.value = "";
+        render();
+      })
+    );
+  }
 
   selectedDepartmentList.forEach((department) => {
     activeFiltersEl.appendChild(
