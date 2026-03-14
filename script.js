@@ -105,6 +105,8 @@ const COUNTRY_NAME_ALIASES = {
   "The Netherlands": "Netherlands",
 };
 
+const MAP_HIDDEN_COUNTRIES = new Set(["Antarctica"]);
+
 init();
 
 async function init() {
@@ -423,6 +425,9 @@ async function initializeWorldMap() {
     const pathByName = new Map();
 
     countryFeatures.forEach((feature) => {
+      if (MAP_HIDDEN_COUNTRIES.has(feature.name)) {
+        return;
+      }
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute("d", feature.path);
       path.setAttribute("class", "map-base-country");
