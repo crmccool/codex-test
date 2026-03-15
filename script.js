@@ -4,8 +4,6 @@ const WORLD_MAP_FILE = "world-atlas-countries-110m.json";
 const departmentFilter = document.getElementById("departmentFilter");
 const geoFilter = document.getElementById("geoFilter");
 const clearBtn = document.getElementById("clearBtn");
-const departmentSearch = document.getElementById("departmentSearch");
-const countrySearch = document.getElementById("countrySearch");
 const keywordSearch = document.getElementById("keywordSearch");
 const resultsContainer = document.getElementById("results");
 const statusEl = document.getElementById("status");
@@ -17,8 +15,6 @@ let allFaculty = [];
 const selectedDepartments = new Set();
 let allCountries = [];
 const mapCountryElements = new Map();
-let departmentSearchTerm = "";
-let countrySearchTerm = "";
 let keywordSearchTerm = "";
 
 const COUNTRY_COORDINATES = {
@@ -141,14 +137,6 @@ async function init() {
 
 function bindEvents() {
   geoFilter.addEventListener("change", render);
-  departmentSearch.addEventListener("input", () => {
-    departmentSearchTerm = departmentSearch.value.trim().toLowerCase();
-    applyDepartmentSearchFilter();
-  });
-  countrySearch.addEventListener("input", () => {
-    countrySearchTerm = countrySearch.value.trim().toLowerCase();
-    applyCountrySearchFilter();
-  });
   keywordSearch.addEventListener("input", () => {
     keywordSearchTerm = keywordSearch.value.trim();
     render();
@@ -162,13 +150,8 @@ function bindEvents() {
       button.setAttribute("aria-disabled", "false");
     });
     clearSelection(geoFilter);
-    departmentSearch.value = "";
-    countrySearch.value = "";
     keywordSearch.value = "";
-    departmentSearchTerm = "";
-    countrySearchTerm = "";
     keywordSearchTerm = "";
-    applyDepartmentSearchFilter();
     render();
   });
 }
@@ -259,8 +242,6 @@ function populateFilters(facultyList) {
 
   addDepartmentButtons(departments);
   addOptions(geoFilter, allCountries);
-  applyDepartmentSearchFilter();
-  applyCountrySearchFilter();
 }
 
 function uniqueSorted(items) {
@@ -307,24 +288,7 @@ function addDepartmentButtons(values) {
   });
 }
 
-function applyDepartmentSearchFilter() {
-  const buttons = Array.from(departmentFilter.querySelectorAll("button"));
-  buttons.forEach((button) => {
-    const matches =
-      departmentSearchTerm.length === 0 ||
-      button.dataset.value.toLowerCase().includes(departmentSearchTerm);
-    button.hidden = !matches;
-  });
-}
 
-function applyCountrySearchFilter() {
-  Array.from(geoFilter.options).forEach((option) => {
-    const matches =
-      countrySearchTerm.length === 0 ||
-      option.value.toLowerCase().includes(countrySearchTerm);
-    option.hidden = !matches;
-  });
-}
 
 function setOptions(select, values, selectedValues = new Set(), countsByValue = new Map()) {
   select.innerHTML = "";
@@ -747,19 +711,15 @@ function render() {
   const departmentCounts = computeDepartmentCounts(selectedCountriesBeforeUpdate);
   updateDepartmentChipCounts(departmentCounts);
   updateDepartmentFilterOptions(selectedCountriesBeforeUpdate);
-  applyDepartmentSearchFilter();
 
   let departmentMatches = getDepartmentMatches();
   updateCountryFilterOptions(departmentMatches);
-  applyCountrySearchFilter();
 
   const selectedCountries = getSelectedValues(geoFilter);
   updateDepartmentFilterOptions(selectedCountries);
-  applyDepartmentSearchFilter();
 
   departmentMatches = getDepartmentMatches();
   updateCountryFilterOptions(departmentMatches);
-  applyCountrySearchFilter();
 
   const availableCountries = new Set(Array.from(geoFilter.options, (opt) => opt.value));
   updateMapSelection(selectedCountries, availableCountries);

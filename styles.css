@@ -27,7 +27,7 @@ body {
 }
 
 .container {
-  max-width: 1160px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.25rem 2.5rem;
 }
@@ -77,16 +77,25 @@ header p {
 }
 
 .filter-row-country-map {
-  grid-template-columns: minmax(500px, 1.8fr) minmax(240px, 1fr);
+  grid-template-columns: minmax(590px, 2.2fr) minmax(210px, 0.78fr);
   align-items: stretch;
 }
 
 .filter-row-secondary {
-  grid-template-columns: minmax(500px, 1.8fr) minmax(240px, 1fr);
+  grid-template-columns: minmax(590px, 2.15fr) minmax(225px, 0.82fr);
   align-items: start;
 }
 
+.country-control-group select {
+  min-height: 14.5rem;
+}
+
+.control-group-departments {
+  min-width: 0;
+}
+
 .secondary-right-column {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
