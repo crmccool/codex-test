@@ -404,6 +404,8 @@ function updateDepartmentFilterOptions(selectedCountries) {
 }
 
 function getDepartmentMatches() {
+  const keywordTerms = parseKeywordTerms(keywordSearchTerm);
+
   return allFaculty.filter((person) => {
     const departmentPasses =
       selectedDepartments.size === 0 || selectedDepartments.has(person.department);
@@ -412,14 +414,20 @@ function getDepartmentMatches() {
       return false;
     }
 
-    return keywordMatchesPerson(person, keywordSearchTerm);
+    return keywordMatchesPerson(person, keywordTerms);
   });
 }
 
-function keywordMatchesPerson(person, keywordTerm) {
-  const normalizedKeywordTerm = keywordTerm.toLowerCase();
+function parseKeywordTerms(keywordTerm) {
+  return String(keywordTerm)
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+}
 
-  if (!normalizedKeywordTerm) {
+function keywordMatchesPerson(person, keywordTerms) {
+  if (keywordTerms.length === 0) {
     return true;
   }
 
@@ -432,7 +440,7 @@ function keywordMatchesPerson(person, keywordTerm) {
     .join(" ")
     .toLowerCase();
 
-  return haystack.includes(normalizedKeywordTerm);
+  return keywordTerms.every((term) => haystack.includes(term));
 }
 
 function updateCountryFilterOptions(departmentMatches) {
@@ -875,33 +883,38 @@ function createFilterPill(label, onRemove) {
 }
 
 function renderCard(person, selectedCountries = new Set()) {
+  const keywordTerms = parseKeywordTerms(keywordSearchTerm);
   const departmentText = person.department || "Not specified";
-  const countryText = renderCountries(person.countries, selectedCountries);
+  const countryText = renderCountries(person.countries, selectedCountries, keywordTerms);
   const descriptionText = person.description || "No description provided.";
-  const highlightedDescription = highlightKeywordMatches(descriptionText, keywordSearchTerm);
+  const highlightedName = highlightKeywordMatches(person.name, keywordTerms);
+  const highlightedDepartment = highlightKeywordMatches(departmentText, keywordTerms);
+  const highlightedDescription = highlightKeywordMatches(descriptionText, keywordTerms);
 
   return `
     <article class="card">
-      <h2>${escapeHtml(person.name)}</h2>
-      <p class="meta"><strong>Department:</strong> ${escapeHtml(departmentText)}</p>
+      <h2>${highlightedName}</h2>
+      <p class="meta"><strong>Department:</strong> ${highlightedDepartment}</p>
       <p class="meta"><strong>Countries:</strong> ${countryText}</p>
       <p class="description">${highlightedDescription}</p>
     </article>
   `;
 }
 
-function highlightKeywordMatches(text, keywordTerm) {
-  if (!keywordTerm) {
+function highlightKeywordMatches(text, keywordTerms) {
+  if (!keywordTerms.length) {
     return escapeHtml(text);
   }
 
-  const escapedKeyword = escapeRegExp(keywordTerm);
-  const matcher = new RegExp(`(${escapedKeyword})`, "gi");
+  const escapedKeywords = keywordTerms
+    .map((term) => escapeRegExp(term))
+    .sort((a, b) => b.length - a.length);
+  const matcher = new RegExp(`(${escapedKeywords.join("|")})`, "gi");
   const parts = String(text).split(matcher);
 
   return parts
     .map((part) => {
-      if (part.toLowerCase() === keywordTerm.toLowerCase()) {
+      if (keywordTerms.some((term) => part.toLowerCase() === term)) {
         return `<span class="country-match">${escapeHtml(part)}</span>`;
       }
       return escapeHtml(part);
@@ -913,18 +926,18 @@ function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function renderCountries(countries, selectedCountries) {
+function renderCountries(countries, selectedCountries, keywordTerms) {
   if (!countries.length) {
     return "Not specified";
   }
 
   return countries
     .map((country) => {
-      const countryLabel = escapeHtml(country);
+      const highlightedCountry = highlightKeywordMatches(country, keywordTerms);
       if (selectedCountries.size > 0 && selectedCountries.has(country)) {
-        return `<span class="country-match">${countryLabel}</span>`;
+        return `<span class="country-match">${highlightedCountry}</span>`;
       }
-      return countryLabel;
+      return highlightedCountry;
     })
     .join(", ");
 }
