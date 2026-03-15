@@ -786,7 +786,7 @@ function render() {
   const selectedDepartmentList = Array.from(selectedDepartments);
   const selectedCountryList = Array.from(selectedCountries);
   renderActiveFilterPills(selectedDepartmentList, selectedCountryList, keywordSearchTerm);
-  statusEl.textContent = `Showing ${filtered.length} of ${allFaculty.length} faculty members. ${buildFilterSummary(selectedDepartmentList, selectedCountryList, keywordSearchTerm)}`;
+  statusEl.textContent = `Showing ${filtered.length} of ${allFaculty.length} faculty members.`;
 
   if (filtered.length === 0) {
     resultsContainer.innerHTML = "<p>No faculty match the current filters.</p>";
