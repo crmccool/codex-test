@@ -868,15 +868,39 @@ function renderCard(person, selectedCountries = new Set()) {
   const departmentText = person.department || "Not specified";
   const countryText = renderCountries(person.countries, selectedCountries);
   const descriptionText = person.description || "No description provided.";
+  const highlightedDescription = highlightKeywordMatches(descriptionText, keywordSearchTerm);
 
   return `
     <article class="card">
       <h2>${escapeHtml(person.name)}</h2>
       <p class="meta"><strong>Department:</strong> ${escapeHtml(departmentText)}</p>
       <p class="meta"><strong>Countries:</strong> ${countryText}</p>
-      <p class="description">${escapeHtml(descriptionText)}</p>
+      <p class="description">${highlightedDescription}</p>
     </article>
   `;
+}
+
+function highlightKeywordMatches(text, keywordTerm) {
+  if (!keywordTerm) {
+    return escapeHtml(text);
+  }
+
+  const escapedKeyword = escapeRegExp(keywordTerm);
+  const matcher = new RegExp(`(${escapedKeyword})`, "gi");
+  const parts = String(text).split(matcher);
+
+  return parts
+    .map((part) => {
+      if (part.toLowerCase() === keywordTerm.toLowerCase()) {
+        return `<span class="country-match">${escapeHtml(part)}</span>`;
+      }
+      return escapeHtml(part);
+    })
+    .join("");
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function renderCountries(countries, selectedCountries) {
