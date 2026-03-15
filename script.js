@@ -10,6 +10,7 @@ const statusEl = document.getElementById("status");
 const activeFiltersEl = document.getElementById("activeFilters");
 const mapBaseLayer = document.getElementById("mapBase");
 const mapCountriesLayer = document.getElementById("mapCountries");
+const worldMap = document.getElementById("worldMap");
 
 let allFaculty = [];
 const selectedDepartments = new Set();
@@ -129,6 +130,7 @@ async function init() {
     populateFilters(allFaculty);
     await initializeWorldMap();
     bindEvents();
+    syncCountryListHeightWithMap();
     render();
   } catch (error) {
     statusEl.textContent = `Error loading faculty data: ${error.message}`;
@@ -141,6 +143,8 @@ function bindEvents() {
     keywordSearchTerm = keywordSearch.value.trim();
     render();
   });
+  window.addEventListener("resize", syncCountryListHeightWithMap);
+
   clearBtn.addEventListener("click", () => {
     selectedDepartments.clear();
     Array.from(departmentFilter.querySelectorAll("button")).forEach((button) => {
@@ -154,6 +158,24 @@ function bindEvents() {
     keywordSearchTerm = "";
     render();
   });
+}
+
+
+function syncCountryListHeightWithMap() {
+  if (!worldMap || !geoFilter) {
+    return;
+  }
+
+  const mapRect = worldMap.getBoundingClientRect();
+  const controlGroup = geoFilter.closest(".country-control-group");
+  const label = controlGroup?.querySelector("label");
+  const labelOffset = label ? label.getBoundingClientRect().height + 9.6 : 0;
+
+  if (controlGroup) {
+    controlGroup.style.setProperty("--country-label-offset", `${labelOffset}px`);
+  }
+
+  geoFilter.style.setProperty("--country-select-height", `${mapRect.height}px`);
 }
 
 function parseCsv(text) {

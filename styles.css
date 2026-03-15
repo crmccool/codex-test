@@ -88,6 +88,12 @@ header p {
 
 .country-control-group select {
   min-height: 14.5rem;
+  height: var(--country-select-height, 14.5rem);
+}
+
+.country-control-group {
+  --country-label-offset: 0px;
+  padding-top: var(--country-label-offset);
 }
 
 .control-group-departments {
