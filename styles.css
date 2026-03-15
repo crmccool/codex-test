@@ -34,6 +34,14 @@ body {
 
 .hero {
   margin-bottom: 1.1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.hero-content {
+  min-width: 0;
 }
 
 h1 {
@@ -46,6 +54,13 @@ header p {
   margin: 0.6rem 0 0;
   max-width: 78ch;
   color: var(--muted);
+}
+
+.hero-logo {
+  width: clamp(130px, 16vw, 180px);
+  height: auto;
+  flex: 0 0 auto;
+  margin-top: 0.15rem;
 }
 
 .panel {
@@ -404,6 +419,16 @@ button:hover {
 }
 
 @media (max-width: 940px) {
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-logo {
+    width: clamp(120px, 34vw, 160px);
+    margin-top: 0.2rem;
+  }
+
   .filter-row-country-map,
   .filter-row-secondary {
     grid-template-columns: 1fr;
