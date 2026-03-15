@@ -68,18 +68,28 @@ header p {
   gap: 1rem;
 }
 
-.filter-row-departments {
-  grid-template-columns: 1fr;
+.map-country-cluster {
+  border: 1px solid #c4d2e3;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f7f9fd 0%, #eef4fc 100%);
+  box-shadow: var(--shadow-md);
+  padding: 0.95rem;
 }
 
 .filter-row-country-map {
-  grid-template-columns: minmax(260px, 0.9fr) minmax(420px, 1.45fr);
+  grid-template-columns: minmax(500px, 1.8fr) minmax(240px, 1fr);
   align-items: stretch;
 }
 
-.filter-row-keyword {
-  grid-template-columns: minmax(280px, 1fr) auto;
-  align-items: end;
+.filter-row-secondary {
+  grid-template-columns: minmax(500px, 1.8fr) minmax(240px, 1fr);
+  align-items: start;
+}
+
+.secondary-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
 .control-group {
@@ -196,7 +206,7 @@ button:hover {
 }
 
 .active-filters {
-  margin-top: 0.85rem;
+  margin-top: 0;
   padding: 0.55rem 0.7rem;
   display: flex;
   flex-wrap: wrap;
@@ -238,11 +248,11 @@ button:hover {
 }
 
 .map-panel {
-  padding: 1rem 1rem 1.15rem;
-  border: 1px solid #c4d2e3;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #f7f9fd 0%, #f0f5fb 100%);
-  box-shadow: var(--shadow-md);
+  padding: 0.25rem;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
 }
 
 .map-panel h2 {
@@ -380,8 +390,12 @@ button:hover {
 
 @media (max-width: 940px) {
   .filter-row-country-map,
-  .filter-row-keyword {
+  .filter-row-secondary {
     grid-template-columns: 1fr;
+  }
+
+  .map-country-cluster {
+    padding: 0.8rem;
   }
 
   .control-actions {

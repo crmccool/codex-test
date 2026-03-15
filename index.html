@@ -18,8 +18,42 @@
       </header>
 
       <section class="controls panel" aria-label="Filters">
-        <div class="filter-row filter-row-departments">
-          <div class="control-group">
+        <section class="map-country-cluster" aria-label="Geography filters">
+          <div class="filter-row filter-row-country-map">
+            <section class="map-panel" aria-label="Country map filter">
+              <h2>World Map</h2>
+              <p class="map-help">
+                Click a country on the map to add or remove it from the country
+                filter.
+              </p>
+              <svg
+                id="worldMap"
+                class="world-map"
+                viewBox="0 0 1000 360"
+                role="img"
+                aria-label="Clickable world map for country filter"
+              >
+                <g id="mapBase" class="map-land" aria-hidden="true"></g>
+                <g id="mapCountries"></g>
+              </svg>
+            </section>
+
+            <div class="control-group country-control-group">
+              <label for="geoFilter">Countries</label>
+              <input
+                id="countrySearch"
+                class="filter-search"
+                type="search"
+                placeholder="Search countries…"
+                aria-label="Search countries"
+              />
+              <select id="geoFilter" multiple size="8"></select>
+            </div>
+          </div>
+        </section>
+
+        <div class="filter-row filter-row-secondary">
+          <div class="control-group control-group-departments">
             <span>Departments</span>
             <input
               id="departmentSearch"
@@ -35,59 +69,30 @@
               aria-label="Departments"
             ></div>
           </div>
-        </div>
 
-        <div class="filter-row filter-row-country-map">
-          <div class="control-group country-control-group">
-            <label for="geoFilter">Countries</label>
-            <input
-              id="countrySearch"
-              class="filter-search"
-              type="search"
-              placeholder="Search countries…"
-              aria-label="Search countries"
-            />
-            <select id="geoFilter" multiple size="8"></select>
-          </div>
+          <div class="secondary-right-column">
+            <div class="control-group control-group-keyword">
+              <label for="keywordSearch">Keyword search</label>
+              <input
+                id="keywordSearch"
+                class="filter-search"
+                type="search"
+                aria-label="Search faculty details"
+              />
+            </div>
 
-          <section class="map-panel" aria-label="Country map filter">
-            <h2>World Map</h2>
-            <p class="map-help">
-              Click a country on the map to add or remove it from the country
-              filter.
-            </p>
-            <svg
-              id="worldMap"
-              class="world-map"
-              viewBox="0 0 1000 360"
-              role="img"
-              aria-label="Clickable world map for country filter"
-            >
-              <g id="mapBase" class="map-land" aria-hidden="true"></g>
-              <g id="mapCountries"></g>
-            </svg>
-          </section>
-        </div>
+            <section
+              id="activeFilters"
+              class="active-filters panel"
+              aria-label="Active filters"
+            ></section>
 
-        <div class="filter-row filter-row-keyword">
-          <div class="control-group control-group-keyword">
-            <label for="keywordSearch">Keyword search</label>
-            <input
-              id="keywordSearch"
-              class="filter-search"
-              type="search"
-              placeholder="Search topics, methods, conditions, or interests"
-              aria-label="Search faculty details"
-            />
-          </div>
-
-          <div class="control-actions">
-            <button id="clearBtn" type="button">Clear filters</button>
+            <div class="control-actions">
+              <button id="clearBtn" type="button">Clear filters</button>
+            </div>
           </div>
         </div>
       </section>
-
-      <section id="activeFilters" class="active-filters panel" aria-label="Active filters"></section>
 
       <p id="status" class="status panel">Loading faculty data…</p>
 
