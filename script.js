@@ -139,6 +139,8 @@ async function init() {
 
 function bindEvents() {
   geoFilter.addEventListener("change", render);
+  geoFilter.addEventListener("mousedown", handleCountryOptionMouseToggle);
+  geoFilter.addEventListener("keydown", handleCountryOptionKeyboardToggle);
   keywordSearch.addEventListener("input", () => {
     keywordSearchTerm = keywordSearch.value.trim();
     render();
@@ -158,6 +160,33 @@ function bindEvents() {
     keywordSearchTerm = "";
     render();
   });
+}
+
+function handleCountryOptionMouseToggle(event) {
+  const option = event.target.closest("option");
+  if (!option || option.disabled) {
+    return;
+  }
+
+  event.preventDefault();
+  option.selected = !option.selected;
+  geoFilter.focus();
+  render();
+}
+
+function handleCountryOptionKeyboardToggle(event) {
+  if (event.key !== " " && event.key !== "Enter") {
+    return;
+  }
+
+  const option = geoFilter.options[geoFilter.selectedIndex];
+  if (!option || option.disabled) {
+    return;
+  }
+
+  event.preventDefault();
+  option.selected = !option.selected;
+  render();
 }
 
 
