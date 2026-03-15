@@ -108,6 +108,10 @@ const COUNTRY_NAME_ALIASES = {
 };
 
 const MAP_HIDDEN_COUNTRIES = new Set(["Antarctica"]);
+const MAP_VIEW_WIDTH = 1000;
+const MAP_VIEW_HEIGHT = 360;
+const MAP_MIN_LATITUDE = -60;
+const MAP_MAX_LATITUDE = 85;
 
 init();
 
@@ -645,9 +649,15 @@ function ringToPath(ring) {
 
 function projectLonLat([longitude, latitude]) {
   const normalizedLongitude = ((longitude + 540) % 360) - 180;
-  const clampedLatitude = Math.max(-90, Math.min(90, latitude));
-  const x = ((normalizedLongitude + 180) / 360) * 1000;
-  const y = ((90 - clampedLatitude) / 180) * 500;
+  const clampedLatitude = Math.max(
+    MAP_MIN_LATITUDE,
+    Math.min(MAP_MAX_LATITUDE, latitude)
+  );
+  const x = ((normalizedLongitude + 180) / 360) * MAP_VIEW_WIDTH;
+  const y =
+    ((MAP_MAX_LATITUDE - clampedLatitude) /
+      (MAP_MAX_LATITUDE - MAP_MIN_LATITUDE)) *
+    MAP_VIEW_HEIGHT;
   return [x, y];
 }
 
