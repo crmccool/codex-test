@@ -57,7 +57,7 @@ header p {
 }
 
 .hero-logo {
-  width: clamp(130px, 16vw, 180px);
+  width: clamp(260px, 32vw, 360px);
   height: auto;
   flex: 0 0 auto;
   margin-top: 0.15rem;
@@ -425,7 +425,7 @@ button:hover {
   }
 
   .hero-logo {
-    width: clamp(120px, 34vw, 160px);
+    width: clamp(200px, 52vw, 260px);
     margin-top: 0.2rem;
   }
 
