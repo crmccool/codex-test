@@ -267,6 +267,7 @@ function normalizeRow(row) {
   const countries = splitTokens(row.countries_normalized);
 
   return {
+    email: row.email || "",
     name: row.name || "",
     department: row.primary_department || "",
     countries,
@@ -447,6 +448,7 @@ function keywordMatchesPerson(person, keywordTerms) {
   }
 
   const haystack = [
+    person.email,
     person.name,
     person.department,
     person.description,
@@ -898,15 +900,21 @@ function renderCard(person, selectedCountries = new Set()) {
   const departmentText = person.department || "Not specified";
   const countryText = renderCountries(person.countries, selectedCountries, keywordTerms);
   const descriptionText = person.description || "No description provided.";
+  const emailText = person.email || "";
   const highlightedName = highlightKeywordMatches(person.name, keywordTerms);
   const highlightedDepartment = highlightKeywordMatches(departmentText, keywordTerms);
   const highlightedDescription = highlightKeywordMatches(descriptionText, keywordTerms);
+  const escapedEmail = escapeHtml(emailText);
+  const emailMarkup = emailText
+    ? `<p class="meta"><strong>Email:</strong> <a href="mailto:${escapedEmail}">${escapedEmail}</a></p>`
+    : "";
 
   return `
     <article class="card">
       <h2>${highlightedName}</h2>
       <p class="meta"><strong>Department:</strong> ${highlightedDepartment}</p>
       <p class="meta"><strong>Countries:</strong> ${countryText}</p>
+      ${emailMarkup}
       <p class="description">${highlightedDescription}</p>
     </article>
   `;
