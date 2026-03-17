@@ -2,6 +2,7 @@ const CSV_FILE = "CODEX TEST - Faculty List.csv";
 const COUNTRY_REGION_LOOKUP_FILE = "country_region_lookup_canonical.csv";
 const WORLD_MAP_FILE = "world-atlas-countries-110m.json";
 const ENABLE_REGION_FILTER = true;
+const HIDDEN_REGION_FILTER_OPTIONS = new Set(["North America"]);
 
 const departmentFilter = document.getElementById("departmentFilter");
 const geoFilter = document.getElementById("geoFilter");
@@ -342,7 +343,9 @@ function populateFilters(facultyList) {
   allRegions = uniqueSorted(
     allCountries
       .map((country) => getRegionForCountry(country))
-      .filter(Boolean)
+      .filter(
+        (region) => region && !HIDDEN_REGION_FILTER_OPTIONS.has(region)
+      )
   );
 
   addDepartmentButtons(departments);
