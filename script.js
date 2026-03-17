@@ -1,8 +1,10 @@
 const CSV_FILE = "CODEX TEST - Faculty List.csv";
 const WORLD_MAP_FILE = "world-atlas-countries-110m.json";
+const ENABLE_REGION_FILTER = true;
 
 const departmentFilter = document.getElementById("departmentFilter");
 const geoFilter = document.getElementById("geoFilter");
+const regionFilter = document.getElementById("regionFilter");
 const clearBtn = document.getElementById("clearBtn");
 const keywordSearch = document.getElementById("keywordSearch");
 const resultsContainer = document.getElementById("results");
@@ -15,6 +17,7 @@ const worldMap = document.getElementById("worldMap");
 let allFaculty = [];
 const selectedDepartments = new Set();
 let allCountries = [];
+let allRegions = [];
 const mapCountryElements = new Map();
 let keywordSearchTerm = "";
 
@@ -127,6 +130,7 @@ async function init() {
       .filter((row) => row.name)
       .sort(sortFaculty);
 
+    configureRegionFilter();
     populateFilters(allFaculty);
     await initializeWorldMap();
     bindEvents();
@@ -137,7 +141,27 @@ async function init() {
   }
 }
 
+
+function configureRegionFilter() {
+  if (!regionFilter) {
+    return;
+  }
+
+  const regionLabel = document.querySelector('label[for="regionFilter"]');
+
+  if (!ENABLE_REGION_FILTER) {
+    regionFilter.hidden = true;
+    if (regionLabel) {
+      regionLabel.hidden = true;
+    }
+  }
+}
+
 function bindEvents() {
+  if (ENABLE_REGION_FILTER && regionFilter) {
+    regionFilter.addEventListener("change", render);
+  }
+
   geoFilter.addEventListener("change", render);
   geoFilter.addEventListener("mousedown", handleCountryOptionMouseToggle);
   geoFilter.addEventListener("keydown", handleCountryOptionKeyboardToggle);
@@ -156,6 +180,9 @@ function bindEvents() {
       button.setAttribute("aria-disabled", "false");
     });
     clearSelection(geoFilter);
+    if (ENABLE_REGION_FILTER && regionFilter) {
+      regionFilter.value = "";
+    }
     keywordSearch.value = "";
     keywordSearchTerm = "";
     render();
@@ -197,8 +224,9 @@ function syncCountryListHeightWithMap() {
 
   const mapRect = worldMap.getBoundingClientRect();
   const controlGroup = geoFilter.closest(".country-control-group");
-  const label = controlGroup?.querySelector("label");
-  const labelOffset = label ? label.getBoundingClientRect().height + 9.6 : 0;
+  const label = controlGroup?.querySelector("label[for=\"geoFilter\"]");
+  const labelOffset =
+    ENABLE_REGION_FILTER || !label ? 0 : label.getBoundingClientRect().height + 9.6;
 
   if (controlGroup) {
     controlGroup.style.setProperty("--country-label-offset", `${labelOffset}px`);
@@ -265,12 +293,14 @@ function parseCsv(text) {
 
 function normalizeRow(row) {
   const countries = splitTokens(row.countries_normalized);
+  const regions = splitTokens(row.regions_derived);
 
   return {
     email: row.email || "",
     name: row.name || "",
     department: row.primary_department || "",
     countries,
+    regions,
     description: row.focus_areas || "",
   };
 }
@@ -291,8 +321,12 @@ function populateFilters(facultyList) {
     facultyList.map((f) => f.department).filter(Boolean)
   );
   allCountries = uniqueSorted(facultyList.flatMap((f) => f.countries));
+  allRegions = uniqueSorted(facultyList.flatMap((f) => f.regions));
 
   addDepartmentButtons(departments);
+  if (ENABLE_REGION_FILTER && regionFilter) {
+    addOptions(regionFilter, allRegions);
+  }
   addOptions(geoFilter, allCountries);
 }
 
@@ -354,9 +388,9 @@ function setOptions(select, values, selectedValues = new Set(), countsByValue = 
   });
 }
 
-function computeDepartmentCounts(selectedCountries) {
+function computeDepartmentCounts(selectedCountries, selectedRegion) {
   const counts = new Map();
-  const countryMatches = getCountryMatches(selectedCountries);
+  const countryMatches = getCountryMatches(selectedCountries, selectedRegion);
 
   countryMatches.forEach((person) => {
     if (!person.department) {
@@ -388,16 +422,29 @@ function computeCountryCounts(facultyList) {
   return counts;
 }
 
-function getCountryMatches(selectedCountries) {
-  return allFaculty.filter(
-    (person) =>
-      selectedCountries.size === 0 ||
-      person.countries.some((token) => selectedCountries.has(token))
-  );
+function matchesRegion(person, selectedRegion) {
+  if (!ENABLE_REGION_FILTER || !selectedRegion) {
+    return true;
+  }
+
+  return person.regions.some((region) => region === selectedRegion);
 }
 
-function updateDepartmentFilterOptions(selectedCountries) {
-  const countryMatches = getCountryMatches(selectedCountries);
+function getCountryMatches(selectedCountries, selectedRegion = "") {
+  return allFaculty.filter((person) => {
+    if (!matchesRegion(person, selectedRegion)) {
+      return false;
+    }
+
+    return (
+      selectedCountries.size === 0 ||
+      person.countries.some((token) => selectedCountries.has(token))
+    );
+  });
+}
+
+function updateDepartmentFilterOptions(selectedCountries, selectedRegion) {
+  const countryMatches = getCountryMatches(selectedCountries, selectedRegion);
   const availableDepartments = new Set(
     countryMatches.map((person) => person.department).filter(Boolean)
   );
@@ -405,7 +452,8 @@ function updateDepartmentFilterOptions(selectedCountries) {
   Array.from(departmentFilter.querySelectorAll("button")).forEach((button) => {
     const department = button.dataset.value;
     const isAvailable =
-      selectedCountries.size === 0 || availableDepartments.has(department);
+      (selectedCountries.size === 0 && !selectedRegion) ||
+      availableDepartments.has(department);
 
     button.classList.toggle("unavailable", !isAvailable);
     button.disabled = !isAvailable;
@@ -419,10 +467,14 @@ function updateDepartmentFilterOptions(selectedCountries) {
   });
 }
 
-function getDepartmentMatches() {
+function getDepartmentMatches(selectedRegion = "") {
   const keywordTerms = parseKeywordTerms(keywordSearchTerm);
 
   return allFaculty.filter((person) => {
+    if (!matchesRegion(person, selectedRegion)) {
+      return false;
+    }
+
     const departmentPasses =
       selectedDepartments.size === 0 || selectedDepartments.has(person.department);
 
@@ -453,6 +505,7 @@ function keywordMatchesPerson(person, keywordTerms) {
     person.department,
     person.description,
     person.countries.join(" "),
+    person.regions.join(" "),
   ]
     .join(" ")
     .toLowerCase();
@@ -760,18 +813,23 @@ function sortFaculty(a, b) {
 }
 
 function render() {
+  const selectedRegion =
+    ENABLE_REGION_FILTER && regionFilter ? regionFilter.value : "";
   const selectedCountriesBeforeUpdate = getSelectedValues(geoFilter);
-  const departmentCounts = computeDepartmentCounts(selectedCountriesBeforeUpdate);
+  const departmentCounts = computeDepartmentCounts(
+    selectedCountriesBeforeUpdate,
+    selectedRegion
+  );
   updateDepartmentChipCounts(departmentCounts);
-  updateDepartmentFilterOptions(selectedCountriesBeforeUpdate);
+  updateDepartmentFilterOptions(selectedCountriesBeforeUpdate, selectedRegion);
 
-  let departmentMatches = getDepartmentMatches();
+  let departmentMatches = getDepartmentMatches(selectedRegion);
   updateCountryFilterOptions(departmentMatches);
 
   const selectedCountries = getSelectedValues(geoFilter);
-  updateDepartmentFilterOptions(selectedCountries);
+  updateDepartmentFilterOptions(selectedCountries, selectedRegion);
 
-  departmentMatches = getDepartmentMatches();
+  departmentMatches = getDepartmentMatches(selectedRegion);
   updateCountryFilterOptions(departmentMatches);
 
   const availableCountries = new Set(Array.from(geoFilter.options, (opt) => opt.value));
@@ -787,7 +845,12 @@ function render() {
 
   const selectedDepartmentList = Array.from(selectedDepartments);
   const selectedCountryList = Array.from(selectedCountries);
-  renderActiveFilterPills(selectedDepartmentList, selectedCountryList, keywordSearchTerm);
+  renderActiveFilterPills(
+    selectedDepartmentList,
+    selectedCountryList,
+    keywordSearchTerm,
+    selectedRegion
+  );
   statusEl.textContent = `Showing ${filtered.length} of ${allFaculty.length} faculty members.`;
 
   if (filtered.length === 0) {
@@ -800,8 +863,18 @@ function render() {
     .join("");
 }
 
-function buildFilterSummary(selectedDepartmentList, selectedCountryList, keywordTerm) {
-  if (selectedDepartmentList.length === 0 && selectedCountryList.length === 0 && !keywordTerm) {
+function buildFilterSummary(
+  selectedDepartmentList,
+  selectedCountryList,
+  keywordTerm,
+  selectedRegion = ""
+) {
+  if (
+    selectedDepartmentList.length === 0 &&
+    selectedCountryList.length === 0 &&
+    !keywordTerm &&
+    !selectedRegion
+  ) {
     return "No active filters.";
   }
 
@@ -829,15 +902,36 @@ function formatFilterList(values) {
   return `${shown}, +${values.length - maxItems} more`;
 }
 
-function renderActiveFilterPills(selectedDepartmentList, selectedCountryList, keywordTerm) {
+function renderActiveFilterPills(
+  selectedDepartmentList,
+  selectedCountryList,
+  keywordTerm,
+  selectedRegion = ""
+) {
   activeFiltersEl.innerHTML = "";
 
-  if (selectedDepartmentList.length === 0 && selectedCountryList.length === 0 && !keywordTerm) {
+  if (
+    selectedDepartmentList.length === 0 &&
+    selectedCountryList.length === 0 &&
+    !keywordTerm &&
+    !selectedRegion
+  ) {
     activeFiltersEl.hidden = true;
     return;
   }
 
   activeFiltersEl.hidden = false;
+
+  if (selectedRegion) {
+    activeFiltersEl.appendChild(
+      createFilterPill(`Region: ${selectedRegion}`, () => {
+        if (ENABLE_REGION_FILTER && regionFilter) {
+          regionFilter.value = "";
+        }
+        render();
+      })
+    );
+  }
 
   if (keywordTerm) {
     activeFiltersEl.appendChild(
