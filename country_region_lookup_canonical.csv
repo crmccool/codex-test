@@ -1,0 +1,253 @@
+canonical_country,iso2,region,platform
+Ghana,GH,Sub-Saharan Africa,Yes
+Ethiopia,ET,Sub-Saharan Africa,Yes
+Brazil,BR,Latin America & Caribbean,Yes
+China,CN,East / Southeast Asia & Pacific,Yes
+India,IN,South Asia,Yes
+Taiwan,TW,East / Southeast Asia & Pacific,Yes
+United Kingdom,GB,Europe,No
+United States,US,North America,No
+Côte d'Ivoire,CI,Sub-Saharan Africa,No
+Democratic Republic of the Congo,CD,Sub-Saharan Africa,No
+Afghanistan,AF,South Asia,No
+Åland Islands,AX,Europe,No
+Albania,AL,Europe,No
+Algeria,DZ,Middle East & North Africa,No
+American Samoa,AS,East / Southeast Asia & Pacific,No
+Andorra,AD,Europe,No
+Angola,AO,Sub-Saharan Africa,No
+Anguilla,AI,Latin America & Caribbean,No
+Antarctica,AQ,,No
+Antigua and Barbuda,AG,Latin America & Caribbean,No
+Argentina,AR,Latin America & Caribbean,No
+Armenia,AM,Middle East & North Africa,No
+Aruba,AW,Latin America & Caribbean,No
+Australia,AU,East / Southeast Asia & Pacific,No
+Austria,AT,Europe,No
+Azerbaijan,AZ,Middle East & North Africa,No
+Bahamas,BS,Latin America & Caribbean,No
+Bahrain,BH,Middle East & North Africa,No
+Bangladesh,BD,South Asia,No
+Barbados,BB,Latin America & Caribbean,No
+Belarus,BY,Europe,No
+Belgium,BE,Europe,No
+Belize,BZ,Latin America & Caribbean,No
+Benin,BJ,Sub-Saharan Africa,No
+Bermuda,BM,North America,No
+Bhutan,BT,South Asia,No
+Bolivia,BO,Latin America & Caribbean,No
+"Bonaire, Sint Eustatius and Saba",BQ,Latin America & Caribbean,No
+Bosnia and Herzegovina,BA,Europe,No
+Botswana,BW,Sub-Saharan Africa,No
+Bouvet Island,BV,Latin America & Caribbean,No
+British Indian Ocean Territory,IO,Sub-Saharan Africa,No
+Brunei,BN,East / Southeast Asia & Pacific,No
+Bulgaria,BG,Europe,No
+Burkina Faso,BF,Sub-Saharan Africa,No
+Burundi,BI,Sub-Saharan Africa,No
+Cabo Verde,CV,Sub-Saharan Africa,No
+Cambodia,KH,East / Southeast Asia & Pacific,No
+Cameroon,CM,Sub-Saharan Africa,No
+Canada,CA,North America,No
+Cayman Islands,KY,Latin America & Caribbean,No
+Central African Republic,CF,Sub-Saharan Africa,No
+Chad,TD,Sub-Saharan Africa,No
+Chile,CL,Latin America & Caribbean,No
+Christmas Island,CX,East / Southeast Asia & Pacific,No
+Cocos (Keeling) Islands,CC,East / Southeast Asia & Pacific,No
+Colombia,CO,Latin America & Caribbean,No
+Comoros,KM,Sub-Saharan Africa,No
+Republic of the Congo,CG,Sub-Saharan Africa,No
+"Congo, Democratic Republic of the",CD,Sub-Saharan Africa,No
+Cook Islands,CK,East / Southeast Asia & Pacific,No
+Costa Rica,CR,Latin America & Caribbean,No
+Croatia,HR,Europe,No
+Cuba,CU,Latin America & Caribbean,No
+Curaçao,CW,Latin America & Caribbean,No
+Cyprus,CY,Middle East & North Africa,No
+Czechia,CZ,Europe,No
+Denmark,DK,Europe,No
+Djibouti,DJ,Sub-Saharan Africa,No
+Dominica,DM,Latin America & Caribbean,No
+Dominican Republic,DO,Latin America & Caribbean,No
+Ecuador,EC,Latin America & Caribbean,No
+Egypt,EG,Middle East & North Africa,No
+El Salvador,SV,Latin America & Caribbean,No
+Equatorial Guinea,GQ,Sub-Saharan Africa,No
+Eritrea,ER,Sub-Saharan Africa,No
+Estonia,EE,Europe,No
+Eswatini,SZ,Sub-Saharan Africa,No
+Falkland Islands (Malvinas),FK,Latin America & Caribbean,No
+Faroe Islands,FO,Europe,No
+Fiji,FJ,East / Southeast Asia & Pacific,No
+Finland,FI,Europe,No
+France,FR,Europe,No
+French Guiana,GF,Latin America & Caribbean,No
+French Polynesia,PF,East / Southeast Asia & Pacific,No
+French Southern Territories,TF,Sub-Saharan Africa,No
+Gabon,GA,Sub-Saharan Africa,No
+Gambia,GM,Sub-Saharan Africa,No
+Georgia,GE,Middle East & North Africa,No
+Germany,DE,Europe,No
+Gibraltar,GI,Europe,No
+Greece,GR,Europe,No
+Greenland,GL,North America,No
+Grenada,GD,Latin America & Caribbean,No
+Guadeloupe,GP,Latin America & Caribbean,No
+Guam,GU,East / Southeast Asia & Pacific,No
+Guatemala,GT,Latin America & Caribbean,No
+Guernsey,GG,Europe,No
+Guinea,GN,Sub-Saharan Africa,No
+Guinea-Bissau,GW,Sub-Saharan Africa,No
+Guyana,GY,Latin America & Caribbean,No
+Haiti,HT,Latin America & Caribbean,No
+Heard Island and McDonald Islands,HM,East / Southeast Asia & Pacific,No
+Holy See,VA,Europe,No
+Honduras,HN,Latin America & Caribbean,No
+Hong Kong,HK,East / Southeast Asia & Pacific,No
+Hungary,HU,Europe,No
+Iceland,IS,Europe,No
+Indonesia,ID,East / Southeast Asia & Pacific,No
+Iran,IR,South Asia,No
+Iraq,IQ,Middle East & North Africa,No
+Ireland,IE,Europe,No
+Isle of Man,IM,Europe,No
+Israel,IL,Middle East & North Africa,No
+Italy,IT,Europe,No
+Jamaica,JM,Latin America & Caribbean,No
+Japan,JP,East / Southeast Asia & Pacific,No
+Jersey,JE,Europe,No
+Jordan,JO,Middle East & North Africa,No
+Kazakhstan,KZ,Central Asia,No
+Kenya,KE,Sub-Saharan Africa,No
+Kiribati,KI,East / Southeast Asia & Pacific,No
+North Korea,KP,East / Southeast Asia & Pacific,No
+South Korea,KR,East / Southeast Asia & Pacific,No
+Kuwait,KW,Middle East & North Africa,No
+Kyrgyzstan,KG,Central Asia,No
+Laos,LA,East / Southeast Asia & Pacific,No
+Latvia,LV,Europe,No
+Lebanon,LB,Middle East & North Africa,No
+Lesotho,LS,Sub-Saharan Africa,No
+Liberia,LR,Sub-Saharan Africa,No
+Libya,LY,Middle East & North Africa,No
+Liechtenstein,LI,Europe,No
+Lithuania,LT,Europe,No
+Luxembourg,LU,Europe,No
+Macao,MO,East / Southeast Asia & Pacific,No
+Madagascar,MG,Sub-Saharan Africa,No
+Malawi,MW,Sub-Saharan Africa,No
+Malaysia,MY,East / Southeast Asia & Pacific,No
+Maldives,MV,South Asia,No
+Mali,ML,Sub-Saharan Africa,No
+Malta,MT,Europe,No
+Marshall Islands,MH,East / Southeast Asia & Pacific,No
+Martinique,MQ,Latin America & Caribbean,No
+Mauritania,MR,Sub-Saharan Africa,No
+Mauritius,MU,Sub-Saharan Africa,No
+Mayotte,YT,Sub-Saharan Africa,No
+Mexico,MX,Latin America & Caribbean,No
+Micronesia,FM,East / Southeast Asia & Pacific,No
+Moldova,MD,Europe,No
+Monaco,MC,Europe,No
+Mongolia,MN,East / Southeast Asia & Pacific,No
+Montenegro,ME,Europe,No
+Montserrat,MS,Latin America & Caribbean,No
+Morocco,MA,Middle East & North Africa,No
+Mozambique,MZ,Sub-Saharan Africa,No
+Myanmar,MM,East / Southeast Asia & Pacific,No
+Namibia,NA,Sub-Saharan Africa,No
+Nauru,NR,East / Southeast Asia & Pacific,No
+Nepal,NP,South Asia,No
+Netherlands,NL,Europe,No
+New Caledonia,NC,East / Southeast Asia & Pacific,No
+New Zealand,NZ,East / Southeast Asia & Pacific,No
+Nicaragua,NI,Latin America & Caribbean,No
+Niger,NE,Sub-Saharan Africa,No
+Nigeria,NG,Sub-Saharan Africa,No
+Niue,NU,East / Southeast Asia & Pacific,No
+Norfolk Island,NF,East / Southeast Asia & Pacific,No
+North Macedonia,MK,Europe,No
+Northern Mariana Islands,MP,East / Southeast Asia & Pacific,No
+Norway,NO,Europe,No
+Oman,OM,Middle East & North Africa,No
+Pakistan,PK,South Asia,No
+Palau,PW,East / Southeast Asia & Pacific,No
+Palestine,PS,Middle East & North Africa,No
+Panama,PA,Latin America & Caribbean,No
+Papua New Guinea,PG,East / Southeast Asia & Pacific,No
+Paraguay,PY,Latin America & Caribbean,No
+Peru,PE,Latin America & Caribbean,No
+Philippines,PH,East / Southeast Asia & Pacific,No
+Pitcairn,PN,East / Southeast Asia & Pacific,No
+Poland,PL,Europe,No
+Portugal,PT,Europe,No
+Puerto Rico,PR,Latin America & Caribbean,No
+Qatar,QA,Middle East & North Africa,No
+Réunion,RE,Sub-Saharan Africa,No
+Romania,RO,Europe,No
+Russia,RU,Europe,No
+Rwanda,RW,Sub-Saharan Africa,No
+Saint Barthélemy,BL,Latin America & Caribbean,No
+"Saint Helena, Ascension and Tristan da Cunha",SH,Sub-Saharan Africa,No
+Saint Kitts and Nevis,KN,Latin America & Caribbean,No
+Saint Lucia,LC,Latin America & Caribbean,No
+Saint Martin (French part),MF,Latin America & Caribbean,No
+Saint Pierre and Miquelon,PM,North America,No
+Saint Vincent and the Grenadines,VC,Latin America & Caribbean,No
+Samoa,WS,East / Southeast Asia & Pacific,No
+San Marino,SM,Europe,No
+Sao Tome and Principe,ST,Sub-Saharan Africa,No
+Saudi Arabia,SA,Middle East & North Africa,No
+Senegal,SN,Sub-Saharan Africa,No
+Serbia,RS,Europe,No
+Seychelles,SC,Sub-Saharan Africa,No
+Sierra Leone,SL,Sub-Saharan Africa,No
+Singapore,SG,East / Southeast Asia & Pacific,No
+Sint Maarten (Dutch part),SX,Latin America & Caribbean,No
+Slovakia,SK,Europe,No
+Slovenia,SI,Europe,No
+Solomon Islands,SB,East / Southeast Asia & Pacific,No
+Somalia,SO,Sub-Saharan Africa,No
+South Africa,ZA,Sub-Saharan Africa,No
+South Georgia and the South Sandwich Islands,GS,Latin America & Caribbean,No
+South Sudan,SS,Sub-Saharan Africa,No
+Spain,ES,Europe,No
+Sri Lanka,LK,South Asia,No
+Sudan,SD,Middle East & North Africa,No
+Suriname,SR,Latin America & Caribbean,No
+Svalbard and Jan Mayen,SJ,Europe,No
+Sweden,SE,Europe,No
+Switzerland,CH,Europe,No
+Syria,SY,Middle East & North Africa,No
+Tajikistan,TJ,Central Asia,No
+Tanzania,TZ,Sub-Saharan Africa,No
+Thailand,TH,East / Southeast Asia & Pacific,No
+Timor-Leste,TL,East / Southeast Asia & Pacific,No
+Togo,TG,Sub-Saharan Africa,No
+Tokelau,TK,East / Southeast Asia & Pacific,No
+Tonga,TO,East / Southeast Asia & Pacific,No
+Trinidad and Tobago,TT,Latin America & Caribbean,No
+Tunisia,TN,Middle East & North Africa,No
+Türkiye,TR,Middle East & North Africa,No
+Turkmenistan,TM,Central Asia,No
+Turks and Caicos Islands,TC,Latin America & Caribbean,No
+Tuvalu,TV,East / Southeast Asia & Pacific,No
+Uganda,UG,Sub-Saharan Africa,No
+Ukraine,UA,Europe,No
+United Arab Emirates,AE,Middle East & North Africa,No
+United Kingdom of Great Britain and Northern Ireland,GB,Europe,No
+United States of America,US,North America,No
+United States Minor Outlying Islands,UM,East / Southeast Asia & Pacific,No
+Uruguay,UY,Latin America & Caribbean,No
+Uzbekistan,UZ,Central Asia,No
+Vanuatu,VU,East / Southeast Asia & Pacific,No
+Venezuela,VE,Latin America & Caribbean,No
+Vietnam,VN,East / Southeast Asia & Pacific,No
+Virgin Islands (British),VG,Latin America & Caribbean,No
+Virgin Islands (U.S.),VI,Latin America & Caribbean,No
+Wallis and Futuna,WF,East / Southeast Asia & Pacific,No
+Western Sahara,EH,Middle East & North Africa,No
+Yemen,YE,Middle East & North Africa,No
+Zambia,ZM,Sub-Saharan Africa,No
+Zimbabwe,ZW,Sub-Saharan Africa,No
