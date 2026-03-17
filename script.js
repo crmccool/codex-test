@@ -1,4 +1,5 @@
 const CSV_FILE = "CODEX TEST - Faculty List.csv";
+const COUNTRY_REGION_LOOKUP_FILE = "country_region_lookup_canonical.csv";
 const WORLD_MAP_FILE = "world-atlas-countries-110m.json";
 const ENABLE_REGION_FILTER = true;
 
@@ -20,6 +21,7 @@ let allCountries = [];
 let allRegions = [];
 const mapCountryElements = new Map();
 let keywordSearchTerm = "";
+const countryToRegionLookup = new Map();
 
 const COUNTRY_COORDINATES = {
   Argentina: [-64, -34],
@@ -107,6 +109,10 @@ const COUNTRY_NAME_ALIASES = {
   "The Netherlands": "Netherlands",
 };
 
+const LOOKUP_COUNTRY_ALIASES = {
+  "The Netherlands": "Netherlands",
+};
+
 const MAP_HIDDEN_COUNTRIES = new Set(["Antarctica"]);
 const MAP_VIEW_WIDTH = 1000;
 const MAP_VIEW_HEIGHT = 360;
@@ -117,18 +123,30 @@ init();
 
 async function init() {
   try {
-    const response = await fetch(CSV_FILE);
-    if (!response.ok) {
-      throw new Error(`Failed to load CSV: ${response.status}`);
+    const [facultyResponse, lookupResponse] = await Promise.all([
+      fetch(CSV_FILE),
+      fetch(COUNTRY_REGION_LOOKUP_FILE),
+    ]);
+
+    if (!facultyResponse.ok) {
+      throw new Error(`Failed to load CSV: ${facultyResponse.status}`);
+    }
+    if (!lookupResponse.ok) {
+      throw new Error(`Failed to load country-region lookup: ${lookupResponse.status}`);
     }
 
-    const csvText = await response.text();
+    const [csvText, lookupCsvText] = await Promise.all([
+      facultyResponse.text(),
+      lookupResponse.text(),
+    ]);
     const rows = parseCsv(csvText);
+    const lookupRows = parseCsv(lookupCsvText);
 
     allFaculty = rows
       .map(normalizeRow)
       .filter((row) => row.name)
       .sort(sortFaculty);
+    initializeCountryRegionLookup(lookupRows);
 
     configureRegionFilter();
     populateFilters(allFaculty);
@@ -321,7 +339,11 @@ function populateFilters(facultyList) {
     facultyList.map((f) => f.department).filter(Boolean)
   );
   allCountries = uniqueSorted(facultyList.flatMap((f) => f.countries));
-  allRegions = uniqueSorted(facultyList.flatMap((f) => f.regions));
+  allRegions = uniqueSorted(
+    allCountries
+      .map((country) => getRegionForCountry(country))
+      .filter(Boolean)
+  );
 
   addDepartmentButtons(departments);
   if (ENABLE_REGION_FILTER && regionFilter) {
@@ -410,24 +432,14 @@ function updateDepartmentChipCounts(countsByDepartment) {
   });
 }
 
-function computeCountryCounts(facultyList) {
-  const counts = new Map();
-
-  facultyList.forEach((person) => {
-    person.countries.forEach((country) => {
-      counts.set(country, (counts.get(country) || 0) + 1);
-    });
-  });
-
-  return counts;
-}
-
 function matchesRegion(person, selectedRegion) {
   if (!ENABLE_REGION_FILTER || !selectedRegion) {
     return true;
   }
 
-  return person.regions.some((region) => region === selectedRegion);
+  return person.countries.some(
+    (country) => getRegionForCountry(country) === selectedRegion
+  );
 }
 
 function getCountryMatches(selectedCountries, selectedRegion = "") {
@@ -513,19 +525,52 @@ function keywordMatchesPerson(person, keywordTerms) {
   return keywordTerms.every((term) => haystack.includes(term));
 }
 
-function updateCountryFilterOptions(departmentMatches) {
-  const availableCountries =
-    selectedDepartments.size === 0
-      ? allCountries
-      : uniqueSorted(departmentMatches.flatMap((person) => person.countries));
+function updateCountryFilterOptions(departmentMatches, selectedRegion) {
+  const countryCounts = computeCountryCountsForEligibleSet(
+    departmentMatches,
+    selectedRegion
+  );
+  const availableCountries = uniqueSorted(Array.from(countryCounts.keys()));
 
   const selectedGeos = getSelectedValues(geoFilter);
   const stillValidSelections = new Set(
     [...selectedGeos].filter((country) => availableCountries.includes(country))
   );
-  const countryCounts = computeCountryCounts(departmentMatches);
 
   setOptions(geoFilter, availableCountries, stillValidSelections, countryCounts);
+}
+
+function computeCountryCountsForEligibleSet(facultyList, selectedRegion) {
+  const counts = new Map();
+
+  facultyList.forEach((person) => {
+    person.countries.forEach((country) => {
+      if (selectedRegion && getRegionForCountry(country) !== selectedRegion) {
+        return;
+      }
+      counts.set(country, (counts.get(country) || 0) + 1);
+    });
+  });
+
+  return counts;
+}
+
+function initializeCountryRegionLookup(lookupRows) {
+  countryToRegionLookup.clear();
+  lookupRows.forEach((row) => {
+    const country = (row.canonical_country || "").trim();
+    const region = (row.region || "").trim();
+    if (!country || !region) {
+      return;
+    }
+
+    countryToRegionLookup.set(country, region);
+  });
+}
+
+function getRegionForCountry(country) {
+  const normalizedCountry = LOOKUP_COUNTRY_ALIASES[country] || country;
+  return countryToRegionLookup.get(normalizedCountry) || "";
 }
 
 async function initializeWorldMap() {
@@ -824,13 +869,13 @@ function render() {
   updateDepartmentFilterOptions(selectedCountriesBeforeUpdate, selectedRegion);
 
   let departmentMatches = getDepartmentMatches(selectedRegion);
-  updateCountryFilterOptions(departmentMatches);
+  updateCountryFilterOptions(departmentMatches, selectedRegion);
 
   const selectedCountries = getSelectedValues(geoFilter);
   updateDepartmentFilterOptions(selectedCountries, selectedRegion);
 
   departmentMatches = getDepartmentMatches(selectedRegion);
-  updateCountryFilterOptions(departmentMatches);
+  updateCountryFilterOptions(departmentMatches, selectedRegion);
 
   const availableCountries = new Set(Array.from(geoFilter.options, (opt) => opt.value));
   updateMapSelection(selectedCountries, availableCountries);
