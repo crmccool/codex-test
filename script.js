@@ -321,7 +321,7 @@ function normalizeRow(row) {
     countries,
     regions,
     description: row.focus_areas || "",
-    expertsUrl: row.experts_URL || "",
+    expertsUrl: row.experts_url || "",
   };
 }
 
