@@ -321,6 +321,7 @@ function normalizeRow(row) {
     countries,
     regions,
     description: row.focus_areas || "",
+    expertsUrl: row.experts_URL || "",
   };
 }
 
@@ -1044,6 +1045,9 @@ function renderCard(person, selectedCountries = new Set()) {
   const descriptionText = person.description || "No description provided.";
   const emailText = person.email || "";
   const highlightedName = highlightKeywordMatches(person.name, keywordTerms);
+  const nameMarkup = hasInstitutionalProfileUrl(person.expertsUrl)
+    ? `<a href="${escapeHtml(person.expertsUrl)}" target="_blank" rel="noopener noreferrer">${highlightedName}</a>`
+    : highlightedName;
   const highlightedDepartment = highlightKeywordMatches(departmentText, keywordTerms);
   const highlightedDescription = highlightKeywordMatches(descriptionText, keywordTerms);
   const escapedEmail = escapeHtml(emailText);
@@ -1053,13 +1057,27 @@ function renderCard(person, selectedCountries = new Set()) {
 
   return `
     <article class="card">
-      <h2>${highlightedName}</h2>
+      <h2>${nameMarkup}</h2>
       <p class="meta"><strong>Department:</strong> ${highlightedDepartment}</p>
       <p class="meta"><strong>Countries:</strong> ${countryText}</p>
       ${emailMarkup}
       <p class="description">${highlightedDescription}</p>
     </article>
   `;
+}
+
+function hasInstitutionalProfileUrl(value) {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  const normalized = value.trim();
+  if (!normalized) {
+    return false;
+  }
+
+  const normalizedLower = normalized.toLowerCase();
+  return normalizedLower !== "null" && normalizedLower !== "undefined";
 }
 
 function highlightKeywordMatches(text, keywordTerms) {
