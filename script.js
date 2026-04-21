@@ -119,6 +119,8 @@ const MAP_VIEW_WIDTH = 1000;
 const MAP_VIEW_HEIGHT = 360;
 const MAP_MIN_LATITUDE = -60;
 const MAP_MAX_LATITUDE = 85;
+const DESKTOP_COUNTRY_SELECT_SIZE = 8;
+const MOBILE_COUNTRY_SELECT_SIZE = 4;
 
 init();
 
@@ -242,6 +244,8 @@ function syncCountryListHeightWithMap() {
   }
 
   const isMobileViewport = window.matchMedia("(max-width: 640px)").matches;
+  geoFilter.size = isMobileViewport ? MOBILE_COUNTRY_SELECT_SIZE : DESKTOP_COUNTRY_SELECT_SIZE;
+
   if (isMobileViewport) {
     geoFilter.style.removeProperty("--country-select-height");
     return;
