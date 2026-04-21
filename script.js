@@ -241,6 +241,12 @@ function syncCountryListHeightWithMap() {
     return;
   }
 
+  const isMobileViewport = window.matchMedia("(max-width: 640px)").matches;
+  if (isMobileViewport) {
+    geoFilter.style.removeProperty("--country-select-height");
+    return;
+  }
+
   const mapRect = worldMap.getBoundingClientRect();
   const controlGroup = geoFilter.closest(".country-control-group");
   const label = controlGroup?.querySelector("label[for=\"geoFilter\"]");

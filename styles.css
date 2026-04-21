@@ -513,13 +513,20 @@ button:hover {
   }
 
   .country-control-group select {
-    min-height: 11rem;
-    height: var(--country-select-height, 11rem);
+    min-height: 6.5rem;
+    height: var(--country-select-height, 6.5rem);
+    padding: 0.24rem;
   }
 
   .country-control-group .region-select {
     min-height: 0;
     height: auto;
+    padding: 0.38rem;
+  }
+
+  .country-control-group #geoFilter:focus {
+    min-height: 9rem;
+    height: var(--country-select-height, 9rem);
   }
 
   .chip-list {
