@@ -187,7 +187,9 @@ button:focus-visible,
 
 .control-actions {
   display: flex;
-  align-items: end;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.55rem;
 }
 
 button {
@@ -204,6 +206,34 @@ button {
 
 button:hover {
   background: var(--primary-dark);
+}
+
+
+.nav-link-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+}
+
+.return-global-reach {
+  border-radius: 10px;
+  padding: 0.65rem 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--dot-selected, #ffcb05);
+  color: var(--primary);
+  border: 1px solid #d3a900;
+  box-shadow: 0 4px 10px rgba(0, 39, 76, 0.18);
+}
+
+.return-global-reach:hover {
+  background: #f6c100;
+}
+
+.return-global-reach:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.25);
+  outline-offset: 1px;
 }
 
 .chip {
@@ -447,7 +477,8 @@ button:hover {
     align-items: center;
   }
 
-  button#clearBtn {
+  button#clearBtn,
+  .return-global-reach {
     width: 100%;
   }
 }
