@@ -217,14 +217,15 @@ button:hover {
 }
 
 .return-global-reach {
+  border: 0;
   border-radius: 10px;
   padding: 0.65rem 1.05rem;
   font-weight: 600;
   letter-spacing: 0.01em;
+  line-height: normal;
   background: var(--dot-selected, #ffcb05);
   color: var(--primary);
-  border: 1px solid #d3a900;
-  box-shadow: 0 4px 10px rgba(0, 39, 76, 0.18);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.28);
 }
 
 .return-global-reach:hover {
