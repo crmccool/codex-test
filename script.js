@@ -665,8 +665,64 @@ function makeMapCountryInteractive(element, country) {
 
 function makeTitle(country) {
   const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-  title.textContent = country;
+  title.textContent = formatMapTooltip(country);
   return title;
+}
+
+function formatMapTooltip(country, stats = { facultyCount: 0, departmentCount: 0 }) {
+  return [
+    country,
+    `Faculty with activities: ${stats.facultyCount}`,
+    `Departments represented: ${stats.departmentCount}`,
+  ].join("\n");
+}
+
+function updateMapCountryTooltip(country, stats) {
+  const element = mapCountryElements.get(country);
+  const title = element ? element.querySelector("title") : null;
+
+  if (title) {
+    title.textContent = formatMapTooltip(country, stats);
+  }
+}
+
+function computeCountryTooltipStats(facultyList, selectedRegion) {
+  const statsByCountry = new Map();
+
+  allCountries.forEach((country) => {
+    statsByCountry.set(country, { facultyIds: new Set(), departments: new Set() });
+  });
+
+  facultyList.forEach((person, index) => {
+    const facultyId = person.email || person.name || String(index);
+
+    person.countries.forEach((country) => {
+      if (selectedRegion && getRegionForCountry(country) !== selectedRegion) {
+        return;
+      }
+
+      if (!statsByCountry.has(country)) {
+        statsByCountry.set(country, { facultyIds: new Set(), departments: new Set() });
+      }
+
+      const countryStats = statsByCountry.get(country);
+      countryStats.facultyIds.add(facultyId);
+
+      if (person.department) {
+        countryStats.departments.add(person.department);
+      }
+    });
+  });
+
+  return new Map(
+    Array.from(statsByCountry, ([country, stats]) => [
+      country,
+      {
+        facultyCount: stats.facultyIds.size,
+        departmentCount: stats.departments.size,
+      },
+    ])
+  );
 }
 
 function buildFallbackCountryPath(country) {
@@ -818,7 +874,11 @@ function hashCountry(country) {
   return hash;
 }
 
-function updateMapSelection(selectedCountries, availableCountries) {
+function updateMapSelection(
+  selectedCountries,
+  availableCountries,
+  tooltipStatsByCountry = new Map()
+) {
   allCountries.forEach((country) => {
     const element = mapCountryElements.get(country);
     if (!element) {
@@ -827,6 +887,8 @@ function updateMapSelection(selectedCountries, availableCountries) {
 
     const isAvailable = availableCountries.has(country);
     const isSelected = selectedCountries.has(country);
+
+    updateMapCountryTooltip(country, tooltipStatsByCountry.get(country));
 
     element.classList.remove("available", "unavailable", "selected");
     element.classList.add(isAvailable ? "available" : "unavailable");
@@ -892,7 +954,11 @@ function render() {
   updateCountryFilterOptions(departmentMatches, selectedRegion);
 
   const availableCountries = new Set(Array.from(geoFilter.options, (opt) => opt.value));
-  updateMapSelection(selectedCountries, availableCountries);
+  const tooltipStatsByCountry = computeCountryTooltipStats(
+    departmentMatches,
+    selectedRegion
+  );
+  updateMapSelection(selectedCountries, availableCountries, tooltipStatsByCountry);
 
   const filtered = departmentMatches.filter((person) => {
     const geoPasses =
