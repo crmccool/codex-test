@@ -327,6 +327,7 @@ function normalizeRow(row) {
   return {
     email: row.email || "",
     name: row.name || "",
+    degrees: splitTokens(row.degrees).join(", "),
     department: row.primary_department || "",
     countries,
     regions,
@@ -1120,7 +1121,8 @@ function renderCard(person, selectedCountries = new Set()) {
   const countryText = renderCountries(person.countries, selectedCountries, keywordTerms);
   const descriptionText = person.description || "No description provided.";
   const emailText = person.email || "";
-  const highlightedName = highlightKeywordMatches(person.name, keywordTerms);
+  const displayName = person.degrees ? `${person.name}, ${person.degrees}` : person.name;
+  const highlightedName = highlightKeywordMatches(displayName, keywordTerms);
   const nameMarkup = hasInstitutionalProfileUrl(person.expertsUrl)
     ? `<a href="${escapeHtml(person.expertsUrl)}" target="_blank" rel="noopener noreferrer">${highlightedName}</a>`
     : highlightedName;
