@@ -124,10 +124,21 @@ const MOBILE_COUNTRY_SELECT_SIZE = 4;
 
 init();
 
+function fetchFacultyCsv() {
+  const parameters = new URLSearchParams(window.location.search);
+  if (parameters.get("fresh") !== "1") {
+    return fetch(CSV_FILE);
+  }
+
+  const url = new URL(CSV_FILE, window.location.href);
+  url.searchParams.set("refresh", crypto.randomUUID());
+  return fetch(url, { cache: "no-store" });
+}
+
 async function init() {
   try {
     const [facultyResponse, lookupResponse] = await Promise.all([
-      fetch(CSV_FILE),
+      fetchFacultyCsv(),
       fetch(COUNTRY_REGION_LOOKUP_FILE),
     ]);
 
