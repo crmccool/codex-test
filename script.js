@@ -122,7 +122,64 @@ const MAP_MAX_LATITUDE = 85;
 const DESKTOP_COUNTRY_SELECT_SIZE = 8;
 const MOBILE_COUNTRY_SELECT_SIZE = 4;
 
+const MEDICAL_SCHOOL_ORIGIN = "https://medschool.umich.edu";
+const HEADSHOT_FILE = "faculty-headshots.json";
+let headshots = {};
+
+resultsContainer.addEventListener("load", (event) => {
+  if (event.target.matches(".faculty-portrait img")) event.target.hidden = false;
+}, true);
+resultsContainer.addEventListener("error", (event) => {
+  if (event.target.matches(".faculty-portrait img")) event.target.remove();
+}, true);
+
 init();
+loadHeadshots();
+
+function normalizeMedicalSchoolProfile(value) {
+  try {
+    const url = new URL(value.trim());
+    if (url.origin === MEDICAL_SCHOOL_ORIGIN && !url.username && !url.password &&
+        /^\/profile\/\d+\/[a-z0-9-]+\/?$/.test(url.pathname)) {
+      return url.origin + url.pathname.replace(/\/$/, "");
+    }
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+async function loadHeadshots() {
+  try {
+    const response = await fetch(HEADSHOT_FILE);
+    if (!response.ok) return;
+    const data = await response.json();
+    if (!data || typeof data !== "object" || Array.isArray(data)) return;
+    headshots = data;
+    hydrateHeadshots();
+  } catch {
+    // The existing logo remains visible if the optional index is unavailable.
+  }
+}
+
+function hydrateHeadshots() {
+  for (const slot of resultsContainer.querySelectorAll(".faculty-portrait[data-profile]")) {
+    const source = headshots[slot.dataset.profile];
+    if (typeof source !== "string" ||
+        !source.startsWith(MEDICAL_SCHOOL_ORIGIN + "/sites/default/files/styles/square_1_1/public/") ||
+        slot.firstElementChild) continue;
+    const photo = document.createElement("img");
+    photo.alt = "";
+    photo.width = 75;
+    photo.height = 75;
+    photo.loading = "lazy";
+    photo.decoding = "async";
+    photo.hidden = true;
+    // Keep the image laid out so the browser can lazy-load it.
+    slot.append(photo);
+    photo.src = source;
+  }
+}
 
 function fetchFacultyCsv() {
   const parameters = new URLSearchParams(window.location.search);
@@ -998,6 +1055,7 @@ function render() {
   resultsContainer.innerHTML = filtered
     .map((person) => renderCard(person, selectedCountries))
     .join("");
+  hydrateHeadshots();
 }
 
 function buildFilterSummary(
@@ -1146,10 +1204,15 @@ function renderCard(person, selectedCountries = new Set()) {
 
   return `
     <article class="card">
-      <h2>${nameMarkup}</h2>
-      <p class="meta"><strong>Department:</strong> ${highlightedDepartment}</p>
-      <p class="meta"><strong>Countries:</strong> ${countryText}</p>
-      ${emailMarkup}
+      <header class="faculty-card-heading">
+        <div class="faculty-card-details">
+          <h2>${nameMarkup}</h2>
+          <p class="meta"><strong>Department:</strong> ${highlightedDepartment}</p>
+          <p class="meta"><strong>Countries:</strong> ${countryText}</p>
+          ${emailMarkup}
+        </div>
+        <span class="faculty-portrait" aria-hidden="true" data-profile="${escapeHtml(normalizeMedicalSchoolProfile(person.expertsUrl))}"></span>
+      </header>
       <p class="description">${highlightedDescription}</p>
     </article>
   `;
