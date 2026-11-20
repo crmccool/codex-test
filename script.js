@@ -270,9 +270,15 @@ function bindEvents() {
   geoFilter.addEventListener("mousedown", handleCountryOptionMouseToggle);
   geoFilter.addEventListener("keydown", handleCountryOptionKeyboardToggle);
   keywordSearch.addEventListener("input", () => {
+    const wasSearching = Boolean(keywordSearchTerm);
     keywordSearchTerm = keywordSearch.value.trim();
     render();
+    if (keywordSearchTerm && !wasSearching) {
+      trackExplorerEvent("explorer_keyword_search");
+    }
   });
+  resultsContainer.addEventListener("click", trackProfileLinkClick);
+  resultsContainer.addEventListener("auxclick", trackProfileLinkClick);
   window.addEventListener("resize", syncCountryListHeightWithMap);
   bindMapNavigation();
 
@@ -325,9 +331,27 @@ function renderCountryListSelection() {
   const newlySelected = [...getSelectedValues(geoFilter)]
     .filter((country) => !selectedMapCountries.has(country));
   render();
-  const country = newlySelected.findLast((name) => selectedMapCountries.has(name));
+  const validSelections = newlySelected.filter((country) => selectedMapCountries.has(country));
+  for (const country of validSelections) {
+    trackExplorerEvent("explorer_country_select", {
+      selected_country: country,
+      selection_source: "list",
+    });
+  }
+  const country = validSelections.at(-1);
   if (country) {
     showCountryLabel(country);
+  }
+}
+
+function trackExplorerEvent(name, parameters = {}) {
+  window.gtag?.("event", name, parameters);
+}
+
+function trackProfileLinkClick(event) {
+  if (event.type === "auxclick" && event.button !== 1) return;
+  if (event.target.closest(".faculty-card-heading h2 a")) {
+    trackExplorerEvent("explorer_profile_open");
   }
 }
 
@@ -369,6 +393,7 @@ function setMapView(x, y, zoomIndex = mapView.zoomIndex) {
 
 function changeMapZoom(step) {
   const index = Math.max(0, Math.min(mapView.zoomIndex + step, MAP_ZOOM_LEVELS.length - 1));
+  if (index === mapView.zoomIndex) return;
   const currentZoom = MAP_ZOOM_LEVELS[mapView.zoomIndex];
   const nextZoom = MAP_ZOOM_LEVELS[index];
   const centerOffset = (1 / currentZoom - 1 / nextZoom) / 2;
@@ -377,6 +402,10 @@ function changeMapZoom(step) {
     mapView.y + MAP_VIEW_HEIGHT * centerOffset,
     index
   );
+  trackExplorerEvent("explorer_map_zoom", {
+    zoom_direction: step > 0 ? "in" : "out",
+    zoom_level: nextZoom,
+  });
 }
 
 function handleMapNavigationKey(event) {
@@ -1169,7 +1198,14 @@ function toggleCountrySelection(country) {
     return;
   }
   option.selected = !option.selected;
+  const added = option.selected;
   render();
+  if (added && selectedMapCountries.has(country)) {
+    trackExplorerEvent("explorer_country_select", {
+      selected_country: country,
+      selection_source: "map",
+    });
+  }
 }
 
 function getSelectedValues(select) {
