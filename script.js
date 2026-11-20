@@ -107,7 +107,9 @@ const COUNTRY_COORDINATES = {
 
 const COUNTRY_NAME_ALIASES = {
   "Democratic Republic of the Congo": "Congo",
+  "Palestinian Territories": "Palestine",
   "The Netherlands": "Netherlands",
+  "Türkiye": "Turkey",
 };
 
 const LOOKUP_COUNTRY_ALIASES = {
