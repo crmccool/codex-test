@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Faculty Network Explorer</title>
-    <link rel="stylesheet" href="styles.css?v=faculty-headshots" />
+    <link rel="stylesheet" href="styles.css?v=map-navigation" />
     <link rel="manifest" href="site.webmanifest">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <meta name="theme-color" content="#00274C">
@@ -33,21 +33,32 @@
         <section class="map-country-cluster" aria-label="Geography filters">
           <div class="filter-row filter-row-country-map">
             <section class="map-panel" aria-label="Country map filter">
-              <h2>World Map</h2>
-              <p class="map-help">
-                Click a country on the map to add or remove it from the country
-                filter.
+              <div class="map-heading">
+                <h2>World Map</h2>
+                <div class="map-controls" role="group" aria-label="Map view controls">
+                  <button type="button" id="mapZoomOut" aria-label="Zoom out" aria-controls="worldMap" disabled>−</button>
+                  <button type="button" id="mapZoomIn" aria-label="Zoom in" aria-controls="worldMap">+</button>
+                  <button type="button" id="mapReset" aria-controls="worldMap" disabled>Reset view</button>
+                </div>
+              </div>
+              <p class="map-help" id="mapHelp">
+                Select a country to filter. Zoom in, then drag or use the arrow keys to move the map.
               </p>
-              <svg
-                id="worldMap"
-                class="world-map"
-                viewBox="0 0 1000 360"
-                role="img"
-                aria-label="Clickable world map for country filter"
-              >
-                <g id="mapBase" class="map-land" aria-hidden="true"></g>
-                <g id="mapCountries"></g>
-              </svg>
+              <div class="map-viewport">
+                <svg
+                  id="worldMap"
+                  class="world-map"
+                  viewBox="0 0 1000 360"
+                  tabindex="0"
+                  role="group"
+                  aria-label="World map country filter"
+                  aria-describedby="mapHelp"
+                >
+                  <g id="mapBase" class="map-land"></g>
+                  <g id="mapCountries"></g>
+                </svg>
+                <span id="mapCountryLabel" class="map-country-label" aria-hidden="true" hidden></span>
+              </div>
             </section>
 
             <div class="control-group country-control-group">
@@ -108,6 +119,6 @@
       <section id="results" class="results" aria-live="polite"></section>
     </main>
 
-    <script src="script.js?v=map-country-aliases"></script>
+    <script src="script.js?v=map-navigation"></script>
   </body>
 </html>

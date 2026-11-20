@@ -15,6 +15,10 @@ const activeFiltersEl = document.getElementById("activeFilters");
 const mapBaseLayer = document.getElementById("mapBase");
 const mapCountriesLayer = document.getElementById("mapCountries");
 const worldMap = document.getElementById("worldMap");
+const mapZoomIn = document.getElementById("mapZoomIn");
+const mapZoomOut = document.getElementById("mapZoomOut");
+const mapReset = document.getElementById("mapReset");
+const mapCountryLabel = document.getElementById("mapCountryLabel");
 
 let allFaculty = [];
 const selectedDepartments = new Set();
@@ -119,6 +123,15 @@ const LOOKUP_COUNTRY_ALIASES = {
 const MAP_HIDDEN_COUNTRIES = new Set(["Antarctica"]);
 const MAP_VIEW_WIDTH = 1000;
 const MAP_VIEW_HEIGHT = 360;
+const MAP_ZOOM_LEVELS = [1, 1.5, 2.25, 3.5, 5, 8];
+const MAP_DRAG_THRESHOLD = 5;
+const MAP_LABEL_DURATION = 4000;
+const mapView = { x: 0, y: 0, zoomIndex: 0 };
+let mapDrag = null;
+let suppressMapClick = false;
+let selectedMapCountries = new Set();
+let countryLabel = null;
+let countryLabelTimer;
 const MAP_MIN_LATITUDE = -60;
 const MAP_MAX_LATITUDE = 85;
 const DESKTOP_COUNTRY_SELECT_SIZE = 8;
@@ -253,7 +266,7 @@ function bindEvents() {
     regionFilter.addEventListener("change", render);
   }
 
-  geoFilter.addEventListener("change", render);
+  geoFilter.addEventListener("change", renderCountryListSelection);
   geoFilter.addEventListener("mousedown", handleCountryOptionMouseToggle);
   geoFilter.addEventListener("keydown", handleCountryOptionKeyboardToggle);
   keywordSearch.addEventListener("input", () => {
@@ -261,6 +274,7 @@ function bindEvents() {
     render();
   });
   window.addEventListener("resize", syncCountryListHeightWithMap);
+  bindMapNavigation();
 
   clearBtn.addEventListener("click", () => {
     selectedDepartments.clear();
@@ -289,7 +303,7 @@ function handleCountryOptionMouseToggle(event) {
   event.preventDefault();
   option.selected = !option.selected;
   geoFilter.focus();
-  render();
+  renderCountryListSelection();
 }
 
 function handleCountryOptionKeyboardToggle(event) {
@@ -304,7 +318,170 @@ function handleCountryOptionKeyboardToggle(event) {
 
   event.preventDefault();
   option.selected = !option.selected;
+  renderCountryListSelection();
+}
+
+function renderCountryListSelection() {
+  const newlySelected = [...getSelectedValues(geoFilter)]
+    .filter((country) => !selectedMapCountries.has(country));
   render();
+  const country = newlySelected.findLast((name) => selectedMapCountries.has(name));
+  if (country) {
+    showCountryLabel(country);
+  }
+}
+
+function bindMapNavigation() {
+  mapZoomIn.addEventListener("click", () => changeMapZoom(1));
+  mapZoomOut.addEventListener("click", () => changeMapZoom(-1));
+  mapReset.addEventListener("click", () => setMapView(0, 0, 0));
+  worldMap.addEventListener("keydown", handleMapNavigationKey);
+  worldMap.addEventListener("pointerdown", startMapDrag);
+  worldMap.addEventListener("pointermove", moveMapDrag);
+  worldMap.addEventListener("pointerup", endMapDrag);
+  worldMap.addEventListener("pointercancel", endMapDrag);
+  worldMap.addEventListener("lostpointercapture", endMapDrag);
+  worldMap.addEventListener("pointerleave", (event) => {
+    if (!mapDrag?.moved) endMapDrag(event);
+  });
+  worldMap.addEventListener("click", (event) => {
+    if (suppressMapClick && event.detail > 0) {
+      event.stopPropagation();
+    }
+    suppressMapClick = false;
+  }, true);
+  window.addEventListener("resize", positionCountryLabel);
+}
+
+function setMapView(x, y, zoomIndex = mapView.zoomIndex) {
+  const zoom = MAP_ZOOM_LEVELS[zoomIndex];
+  const width = MAP_VIEW_WIDTH / zoom;
+  const height = MAP_VIEW_HEIGHT / zoom;
+  mapView.x = Math.max(0, Math.min(x, MAP_VIEW_WIDTH - width));
+  mapView.y = Math.max(0, Math.min(y, MAP_VIEW_HEIGHT - height));
+  mapView.zoomIndex = zoomIndex;
+  worldMap.setAttribute("viewBox", `${mapView.x} ${mapView.y} ${width} ${height}`);
+  worldMap.classList.toggle("is-zoomed", zoomIndex > 0);
+  mapZoomIn.disabled = zoomIndex === MAP_ZOOM_LEVELS.length - 1;
+  mapZoomOut.disabled = mapReset.disabled = zoomIndex === 0;
+  positionCountryLabel();
+}
+
+function changeMapZoom(step) {
+  const index = Math.max(0, Math.min(mapView.zoomIndex + step, MAP_ZOOM_LEVELS.length - 1));
+  const currentZoom = MAP_ZOOM_LEVELS[mapView.zoomIndex];
+  const nextZoom = MAP_ZOOM_LEVELS[index];
+  const centerOffset = (1 / currentZoom - 1 / nextZoom) / 2;
+  setMapView(
+    mapView.x + MAP_VIEW_WIDTH * centerOffset,
+    mapView.y + MAP_VIEW_HEIGHT * centerOffset,
+    index
+  );
+}
+
+function handleMapNavigationKey(event) {
+  if (event.target !== worldMap || event.altKey || event.ctrlKey || event.metaKey) return;
+  const zoom = MAP_ZOOM_LEVELS[mapView.zoomIndex];
+  const xStep = MAP_VIEW_WIDTH / zoom / 8;
+  const yStep = MAP_VIEW_HEIGHT / zoom / 8;
+  switch (event.key) {
+    case "+": case "=": changeMapZoom(1); break;
+    case "-": changeMapZoom(-1); break;
+    case "Home":
+      if (zoom === 1) return;
+      setMapView(0, 0, 0);
+      break;
+    case "ArrowLeft": case "ArrowRight": case "ArrowUp": case "ArrowDown":
+      if (zoom === 1) return;
+      setMapView(
+        mapView.x + (event.key === "ArrowLeft" ? -xStep : event.key === "ArrowRight" ? xStep : 0),
+        mapView.y + (event.key === "ArrowUp" ? -yStep : event.key === "ArrowDown" ? yStep : 0)
+      );
+      break;
+    default: return;
+  }
+  event.preventDefault();
+}
+
+function startMapDrag(event) {
+  if (!event.isPrimary || event.button !== 0) return;
+  suppressMapClick = false;
+  if (mapView.zoomIndex === 0) return;
+  const scale = worldMap.getScreenCTM()?.a;
+  if (!scale) return;
+  mapDrag = {
+    pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY,
+    x: mapView.x, y: mapView.y, scale, moved: false,
+  };
+}
+
+function moveMapDrag(event) {
+  if (mapDrag?.pointerId !== event.pointerId) return;
+  const dx = event.clientX - mapDrag.clientX;
+  const dy = event.clientY - mapDrag.clientY;
+  if (!mapDrag.moved) {
+    if (Math.hypot(dx, dy) < MAP_DRAG_THRESHOLD) return;
+    mapDrag.moved = true;
+    suppressMapClick = true;
+    worldMap.setPointerCapture(event.pointerId);
+    worldMap.classList.add("is-panning");
+  }
+  setMapView(mapDrag.x - dx / mapDrag.scale, mapDrag.y - dy / mapDrag.scale);
+}
+
+function endMapDrag(event) {
+  if (mapDrag?.pointerId !== event.pointerId) return;
+  mapDrag = null;
+  worldMap.classList.remove("is-panning");
+}
+
+function showCountryLabel(country) {
+  const path = mapCountryElements.get(country);
+  if (!path) return;
+
+  const bounds = path.getBBox();
+  const [x, y] = COUNTRY_COORDINATES[country]
+    ? projectCountry(country)
+    : [bounds.x + bounds.width / 2, bounds.y + bounds.height / 2];
+  countryLabel = { country, x, y };
+  mapCountryLabel.textContent = country;
+
+  const zoom = MAP_ZOOM_LEVELS[mapView.zoomIndex];
+  const width = MAP_VIEW_WIDTH / zoom;
+  const height = MAP_VIEW_HEIGHT / zoom;
+  if (x < mapView.x || x > mapView.x + width || y < mapView.y || y > mapView.y + height) {
+    setMapView(x - width / 2, y - height / 2);
+  } else {
+    positionCountryLabel();
+  }
+
+  clearTimeout(countryLabelTimer);
+  countryLabelTimer = setTimeout(hideCountryLabel, MAP_LABEL_DURATION);
+}
+
+function positionCountryLabel() {
+  if (!countryLabel) return;
+  const matrix = worldMap.getScreenCTM();
+  if (!matrix) return;
+  const point = new DOMPoint(countryLabel.x, countryLabel.y).matrixTransform(matrix);
+  const viewport = mapCountryLabel.parentElement.getBoundingClientRect();
+  const x = point.x - viewport.left;
+  const y = point.y - viewport.top;
+  mapCountryLabel.hidden = x < 0 || x > viewport.width || y < 0 || y > viewport.height;
+  if (mapCountryLabel.hidden) return;
+
+  const labelWidth = mapCountryLabel.offsetWidth;
+  const labelHeight = mapCountryLabel.offsetHeight;
+  const left = Math.max(4, Math.min(x - labelWidth / 2, viewport.width - labelWidth - 4));
+  const top = y >= labelHeight + 12 ? y - labelHeight - 8 : y + 8;
+  mapCountryLabel.style.left = `${left}px`;
+  mapCountryLabel.style.top = `${Math.min(top, viewport.height - labelHeight - 4)}px`;
+}
+
+function hideCountryLabel() {
+  clearTimeout(countryLabelTimer);
+  countryLabel = null;
+  mapCountryLabel.hidden = true;
 }
 
 
@@ -950,6 +1127,10 @@ function updateMapSelection(
   availableCountries,
   tooltipStatsByCountry = new Map()
 ) {
+  selectedMapCountries = selectedCountries;
+  if (countryLabel && !selectedCountries.has(countryLabel.country)) {
+    hideCountryLabel();
+  }
   allCountries.forEach((country) => {
     const element = mapCountryElements.get(country);
     if (!element) {
@@ -971,9 +1152,13 @@ function updateMapSelection(
     if (isAvailable) {
       element.setAttribute("tabindex", "0");
       element.setAttribute("role", "button");
+      element.setAttribute("aria-label", country);
+      element.setAttribute("aria-pressed", String(isSelected));
     } else {
       element.removeAttribute("tabindex");
       element.removeAttribute("role");
+      element.removeAttribute("aria-label");
+      element.removeAttribute("aria-pressed");
     }
   });
 }
